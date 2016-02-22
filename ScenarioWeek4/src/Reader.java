@@ -43,7 +43,7 @@ public class Reader {
 		int counterTwo = 0;
 		
 		for (String pair : coordList[number].split("\\(|\\,|\\)")) { //Get each value
-			if(pair.matches("\\-?\\d+|\\d+\\.\\d+")==true){ //Get rid of null values and only accept numbers or decimals
+			if(pair.matches("\\-?(\\d+|\\d+\\.\\d+)")==true){ //Get rid of null values and only accept numbers or decimals
 				double coord = Double.parseDouble(pair); //Convert the string coordinate into a double
 				points[counter][counterTwo] = coord;
 				counterTwo++;

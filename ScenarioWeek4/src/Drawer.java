@@ -1,19 +1,16 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.lang.Object;
-import java.sql.PreparedStatement;
-import java.util.Arrays;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Point2D;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -26,21 +23,21 @@ import javax.swing.text.DefaultHighlighter;
 
 public class Drawer extends JPanel {
 
-	private Path2D path;
+	private Path2D path = new Path2D.Double();
 	private JFrame f;
 	private JTextArea initialTextArea;
 	private DragAndDropListener listener;
 	private Reader reader;
+	
 	private int scale = 15;
 	private int translateX;
 	private int translateY;
-	//double[][] points = {{10, 5}, {9, 5}, {9, 7}, {8, 7}, {8, 5}, {6, 5}, {6, 7}, {5, 7}, {5, 3}, {4, 3}, {4, 5}, {3, 5}, {3, 3}, {2, 3}, {2, 7}, {1, 7}, {1, 6}, {0, 6}, {0, 10}, {-1, 10}, {-1, 9}, {-3, 9}, {-3, 8}, {-1, 8}, {-1, 6}, {-4, 6}, {-4, 5}, {-3, 5}, {-3, 4}, {-7, 4}, {-7, 3}, {-6, 3}, {-6, 2}, {-11, 2}, {-11, 1}, {-10, 1}, {-10, -1}, {-9, -1}, {-9, 1}, {-8, 1}, {-8, -1}, {-7, -1}, {-7, 1}, {-6, 1}, {-6, -2}, {-5, -2}, {-5, 3}, {-3, 3}, {-3, 0}, {-2, 0}, {-2, 5}, {-1, 5}, {-1, 3}, {0, 3}, {0, 5}, {1, 5}, {1, 1}, {0, 1}, {0, 0}, {1, 0}, {1, -1}, {-2, -1}, {-2, -2}, {-1, -2}, {-1, -3}, {-3, -3}, {-3, -4}, {-1, -4}, {-1, -5}, {0, -5}, {0, -2}, {1, -2}, {1, -3}, {2, -3}, {2, -2}, {3, -2}, {3, -4}, {4, -4}, {4, -2}, {5, -2}, {5, -1}, {2, -1}, {2, 0}, {3, 0}, {3, 1}, {2, 1}, {2, 2}, {7, 2}, {7, 3}, {6, 3}, {6, 4}, {10, 4}};
 	
 	private int biggestX;
 	private int smallestX;
 	private int biggestY;
 	private int smallestY;
-	//double[][] points = {{5,5},{5,10},{10,10},{10,5}};
+	
 	public Drawer() {
 		listener = new DragAndDropListener(this);
 		this.addMouseListener(listener);
@@ -52,7 +49,7 @@ public class Drawer extends JPanel {
 		f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.add(this);
-	    f.setTitle("Chartreuse Shots on Alex");
+	    f.setTitle("Shots on Jamie");
 	    f.setSize(900, 800);
 	    f.setResizable(false);
 	    //f.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -62,7 +59,6 @@ public class Drawer extends JPanel {
 	    addCoordinates(0,0,0,0);
 	    f.setVisible(true);
 	    
-	    path = new Path2D.Double();
 	    //setPolygon();
 	    
 	    this.setLayout(null);
@@ -122,6 +118,7 @@ public class Drawer extends JPanel {
 	       if (points[i][1] < smallestY) smallestY = (int) points[i][1];
 	       
 	    }
+	    
 	    path.closePath();
 	    
 	    translateX = (biggestX - smallestX)*scale;
@@ -131,6 +128,7 @@ public class Drawer extends JPanel {
 	    
 	    removeAll();
 	    repaint();
+	    
 	}
 	  
 	public void addCoordinates(int x, int y, double xCo, double yCo) {
@@ -152,7 +150,7 @@ public class Drawer extends JPanel {
 		removeAll();
 		repaint();
 	}
-	  
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 			
@@ -166,7 +164,9 @@ public class Drawer extends JPanel {
 		g2d.translate((-smallestX*scale)+30, (smallestY*scale)-15);
 		g2d.scale(1, -1);
 		
+		g2d.setColor(Color.BLACK);
 		g2d.fill(path);
+		
 		g2d.dispose();
 		g2d.setTransform(old);
 		
