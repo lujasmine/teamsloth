@@ -9,16 +9,16 @@ public static void readData() {
 	  try{
 		for (String line : Files.readAllLines(Paths.get("Part1Questions.txt"))) {
 				for (String question : line.split("\\d:")) { //Question contains all the coordinates for each question
-					if(question.contains("{")){ //Get rid of null questions
+					if(question.contains("(")){ //Get rid of null questions
 				        question = question.replaceAll("\\s+", ""); //Get rid of whitespace
 				        int questionSize = 0; 
 				        for (int i = 0; i < question.length(); i++){ //Count number of points in question
 				            char c = question.charAt(i);        
-				            if(c == '{'){
+				            if(c == '('){
 				            	questionSize = questionSize+1;
 				            }
 				        }
-				        for (String pair : question.split("\\{|\\,|\\}")) { //Get each value
+				        for (String pair : question.split("\\(|\\,|\\)")) { //Get each value
 				    		if(pair.matches("\\d|\\d\\.\\d+")==true){ //Get rid of null values and only accept numbers or decimals
 				    			double coord = Double.parseDouble(pair); //Convert the string coordinate into a double
 				    			//System.out.println("Coord:" + coord);
