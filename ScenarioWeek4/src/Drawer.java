@@ -52,7 +52,7 @@ public class Drawer extends JPanel {
 		f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.add(this);
-	    f.setTitle("Shots on Jamie");
+	    f.setTitle("Chartreuse Shots on Alex");
 	    f.setSize(900, 800);
 	    f.setResizable(false);
 	    //f.setPreferredSize(new Dimension(WIDTH, HEIGHT));
