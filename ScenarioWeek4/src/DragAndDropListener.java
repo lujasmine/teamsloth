@@ -35,29 +35,7 @@ public class DragAndDropListener implements MouseListener, MouseMotionListener {
 	
 	@Override
 	public void mouseMoved(MouseEvent evt) {
-			int x = evt.getPoint().x;
-			int y = evt.getPoint().y;
-			
-			for (int i = initialComponents.size()-1; i >= 0; i--) {
-				Component component = initialComponents.get(i);
-				
-				if(mouseOverComponent(component,x,y)){
-					checkAndSetSelectedComponent(selectedComponent);
-					simulator.setMouseOverInitial(true);
-					simulator.removeAll();
-					simulator.repaint();
-					simulator.addNameText(x,y, component);
-					break;
-				} else {
-					if (simulator.getMouseOverInitial()) {
-						checkAndSetSelectedComponent(selectedComponent);
-						simulator.removeAll();
-						simulator.repaint();
-						simulator.setMouseOverInitial(false);
-						simulator.addNameText(x,y, null);
-					}
-				}
-			}
+		drawer.addCoordinates(evt.getX(), evt.getY(), evt.getX(), evt.getY());
 	}
 }
 
