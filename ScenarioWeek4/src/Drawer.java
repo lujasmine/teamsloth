@@ -61,7 +61,7 @@ public class Drawer extends JPanel {
 		this.addMouseMotionListener(listener);
 		
 		reader = new Reader();
-		reader.readData();
+		reader.readData(1);
 		
 		intersection = new Intersection();
 		
