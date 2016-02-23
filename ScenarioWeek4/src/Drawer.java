@@ -60,7 +60,7 @@ public class Drawer extends JPanel {
 		this.addMouseListener(listener);
 		this.addMouseMotionListener(listener);
 		
-		reader = new Reader();
+		reader = new Reader(this);
 		reader.readData(1);
 		reader.readData(2);
 		

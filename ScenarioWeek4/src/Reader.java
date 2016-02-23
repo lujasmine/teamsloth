@@ -11,6 +11,11 @@ public class Reader {
 	String[] vertexList2 = new String[numberOfQuestions2]; //Vertex list for each question for part 2
 	int[] vertexListSize2 = new int[numberOfQuestions2]; //Number of points in each question for part 2
 	String[] guardList = new String[numberOfQuestions2]; //Guard list for part 2
+	Drawer drawer;
+	
+	public Reader(Drawer drawer) {
+		this.drawer = drawer;
+	}
 
 	public void readData(int part) {
 		int eachQuestion = 0; //Counter value for each question
@@ -43,9 +48,9 @@ public class Reader {
 							vertexListSize2[eachQuestion] = questionSize;
 							guardList[eachQuestion] = guards;
 						}
-						System.out.println("Question(" + eachQuestion+ "):" + question);
-						System.out.println("Vertices(" + eachQuestion + "):" + vertices);
-						System.out.println("Guards(" + eachQuestion + "):" + guards);
+						//System.out.println("Question(" + eachQuestion+ "):" + question);
+						//System.out.println("Vertices(" + eachQuestion + "):" + vertices);
+						//System.out.println("Guards(" + eachQuestion + "):" + guards);
 						//System.out.println("Size for question " + eachQuestion + ":" + coordListSize[eachQuestion]);
 					}
 				}	
@@ -71,7 +76,6 @@ public class Reader {
 						counter++;
 						counterTwo = 0;
 					}
-					//System.out.println("Coord:" + coord);
 				}
 			}
 			return points;
@@ -87,7 +91,27 @@ public class Reader {
 						counter++;
 						counterTwo = 0;
 					}
-					System.out.println("Coord:" + coord);
+				}
+			}
+			double x=0;
+			double y=0;
+			counter=0;
+			counterTwo=0;
+			System.out.println("Guard list: " + guardList[questionNumber]);
+			for (String pair : guardList[questionNumber].split("\\(|\\,|\\)")) {
+				if(pair.matches("\\-?(\\d+|\\d+\\.\\d+)")==true){
+					if(counter % 2 ==0){
+						counter++;
+						x = Double.parseDouble(pair); //Get x coord of guard
+					}
+					else{
+						counter++;
+						y = Double.parseDouble(pair); //Get y coord of guard
+					}
+					if(counter%2 == 0){
+						System.out.println("Guard added at x:" + x + "y:" + y);
+						//drawer.addGuard(x,y); //Uncomment this when bug is fixed!
+					}
 				}
 			}
 			return points;
