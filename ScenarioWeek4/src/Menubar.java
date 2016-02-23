@@ -1,5 +1,8 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -32,11 +35,12 @@ public class Menubar {
 		
 		export.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				File file = new File(Drawer.galleryNumber + ".txt");
+				File file = new File("Question " + Drawer.galleryNumber + " answer.txt");
 			    try {
 					file.createNewFile();
 				    FileWriter writer = new FileWriter(file); 
 				    writer.write("sloth\nrl5qgj5n4mc68qsekeig4j4jfs\n"); 
+				    writer.write(Drawer.galleryNumber+": ");
 				    writer.flush();
 				    writer.close();
 				} catch (IOException e) {
@@ -51,7 +55,6 @@ public class Menubar {
 				try {
 					
 					String name = JOptionPane.showInputDialog("Number:");
-					
 					drawer.drawGallery(Integer.parseInt(name));
 
 				}	catch (Exception e) {
