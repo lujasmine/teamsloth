@@ -184,9 +184,9 @@ public class Drawer extends JPanel {
 		biggestY = 0;
 		smallestY = 0;
 		
-		path.moveTo(points[0][0]*scale, points[0][1]*scale);
+		//path.moveTo(points[0][0]*scale, points[0][1]*scale);
 	    for(int i = 1; i < points.length; i++) {
-	       path.lineTo(points[i][0]*scale, points[i][1]*scale);
+	       //path.lineTo(points[i][0]*scale, points[i][1]*scale);
 	       
 	       if (points[i][0] > biggestX) biggestX = (int) points[i][0];
 	       if (points[i][0] < smallestX) smallestX = (int) points[i][0];
@@ -194,31 +194,40 @@ public class Drawer extends JPanel {
 	       if (points[i][1] < smallestY) smallestY = (int) points[i][1];
 	    }
 	    
-	    path.closePath();
+	    //path.closePath();
 	    
 	    translateX = (biggestX - smallestX)*scale;
 	    translateY = (biggestY - smallestY)*scale;
+	    smallestX = smallestX-1;
+	    smallestY = smallestY-1;
 	    	    
-	    f.setSize(translateX+(-smallestX*scale)+120, translateY+120);
+	    //f.setSize(-200, 300);
 	    
-	    if (translateX > 1000 || translateY > 750) {
+	    if (translateX > 1100 || translateY > 650) {
 	    	scale--;
 	    	setPolygon(galleryPoints);
 	    	return;
 	    }
 	    
-	    for(int i = 0; i < galleryPoints.length; i++) {
-	    	for(int j = 0; j < galleryPoints[i].length; j++) {
-	    		galleryPoints[i][j] = galleryPoints[i][j]*scale;
-	    	}
+	    path.moveTo((galleryPoints[0][0]-smallestX)*scale, (galleryPoints[0][1]-smallestY)*scale);
+	    galleryPoints[0][0] = (galleryPoints[0][0]-smallestX)*scale;
+		galleryPoints[0][1] = (galleryPoints[0][1]-smallestY)*scale;
+	    for(int i = 1; i < galleryPoints.length; i++) {
+	    	//for(int j = 0; j < galleryPoints[i].length; j++) {
+	    	path.lineTo((galleryPoints[i][0]-smallestX)*scale, (galleryPoints[i][1]-smallestY)*scale);
+	    		galleryPoints[i][0] = (galleryPoints[i][0]-smallestX)*scale;
+	    		galleryPoints[i][1] = (galleryPoints[i][1]-smallestY)*scale;
+	    	//}
 	    }
+	    
+	    path.closePath();
 	    
 	    
 	}
 	  
 	public void addCoordinates(int x, int y, double xCo, double yCo) {
-		xCo = (xCo+(smallestX*scale)-45)/scale;
-		yCo = -((yCo-(smallestY*scale)+30-(getHeight()))/scale);
+		xCo = xCo/scale+smallestX;
+		yCo = yCo/scale+smallestY;
 	  
 		initialTextArea = new JTextArea(0, 20);
 		initialTextArea.setEditable(false);
@@ -237,7 +246,7 @@ public class Drawer extends JPanel {
 	}
 	
 	public void addGuard(double x, double y) {
-		Guard guard = new Guard((x-((-smallestX*scale)+45)), -(y-(getHeight()+(smallestY*scale)-30)));
+		Guard guard = new Guard(x, y);
 		System.out.println("x:" + guard.getX() + ", " + " y: "+ guard.getY());
 		guardList.add(guard);
 		
@@ -275,6 +284,14 @@ public class Drawer extends JPanel {
 		return getHeight();
 	}
 	
+	public double getSmallestX() {
+		return smallestX;
+	}
+	
+	public double getSmallestY() {
+		return smallestY;
+	}
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 			
@@ -287,9 +304,9 @@ public class Drawer extends JPanel {
 		// update graphics object with the inverted y-transform
 		
 		
-		g2d.translate(0, getHeight());
+		/*g2d.translate(0, getHeight());
 		g2d.translate((-smallestX*scale)+45, (smallestY*scale)-30);
-		g2d.scale(1, -1);
+		g2d.scale(1, -1);*/
 		
 		g2d.setColor(Color.BLACK);
 		g2d.fill(path);

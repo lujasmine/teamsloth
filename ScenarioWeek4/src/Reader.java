@@ -115,7 +115,7 @@ public class Reader {
 				if(counter%2 == 0){
 					System.out.println("Guard added at x:" + x + "y:" + y);
 					//(y*drawer.getScale()+30)+drawer.getFrameHeight()
-					drawer.addGuard(x*drawer.getScale()+45,((y+30*drawer.getScale())-drawer.getFrameHeight())); //Uncomment this when bug is fixed!
+					drawer.addGuard((x-drawer.getSmallestX())*drawer.getScale(),(y-drawer.getSmallestY())*drawer.getScale()); //Uncomment this when bug is fixed!
 				}
 			}
 		}

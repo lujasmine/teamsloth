@@ -14,7 +14,6 @@ public class DragAndDropListener implements MouseListener, MouseMotionListener {
 	@Override
 	public void mousePressed(MouseEvent evt) {
 		if(evt.getButton() == MouseEvent.BUTTON1) {
-			System.out.println(evt.getX() + ", " + evt.getY());
 			drawer.addGuard(evt.getX(), evt.getY());
 		}
 		if(evt.getButton() == MouseEvent.BUTTON3 ) {
@@ -27,10 +26,10 @@ public class DragAndDropListener implements MouseListener, MouseMotionListener {
 	}
 	
 	private boolean mouseOverComponent(Guard guard, int x, int y) {
-		return guard.getX()-15 <= x-drawer.getTransformX()
-			&& guard.getX()+15 >= x-drawer.getTransformX()
-			&& guard.getY()-15 <= -(y-drawer.getTransformY()) 
-			&& guard.getY()+15 >= -(y-drawer.getTransformY());
+		return guard.getX()-15 <= x
+			&& guard.getX()+15 >= x
+			&& guard.getY()-15 <= y 
+			&& guard.getY()+15 >= y;
 	}
 
 	@Override
