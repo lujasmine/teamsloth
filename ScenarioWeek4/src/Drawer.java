@@ -49,7 +49,7 @@ public class Drawer extends JPanel {
 	private ArrayList<Line2D> lineList = new ArrayList<Line2D>();
 	private ArrayList<IntersectPoint> intersectList = new ArrayList<IntersectPoint>();
 	
-	static int galleryNumber;
+	private int galleryNumber;
 	
 	Line2D testLine = new Line2D.Double(100,100,200,200);
 	
@@ -68,7 +68,7 @@ public class Drawer extends JPanel {
 		f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.add(this);
-	    f.setTitle("Shots on Jamie");
+	    f.setTitle("Shots on Jaz");
 	    f.setSize(900, 800);
 	    //f.setResizable(false);
 	    //f.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -153,15 +153,23 @@ public class Drawer extends JPanel {
 		return distance;
 	}
 	
-	public void drawGallery(int number) {
+	public void drawGallery(int questionNumber, int part) {
 		scale = 60;
-		galleryNumber = number;
-		galleryPoints = reader.getData(number);
-		
+		galleryNumber = questionNumber;
+		galleryPoints = reader.getData(questionNumber, part);
+		f.setTitle("Shots on Jaz - Part: " + part + " Question: " + questionNumber);
 		setPolygon(galleryPoints);
 		
 		guardList.clear();
+		pathList.clear();
+		lineList.clear();
+		intersectList.clear();
 	}
+	
+	public int getGalleryNumber(){
+		return galleryNumber;
+	}
+
 	
 	public void setPolygon(double[][] points) {
 		path.reset();
