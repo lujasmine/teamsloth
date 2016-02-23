@@ -3,7 +3,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.List;
 
-
 public class DragAndDropListener implements MouseListener, MouseMotionListener {
 
 	private Drawer drawer;
@@ -14,6 +13,23 @@ public class DragAndDropListener implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mousePressed(MouseEvent evt) {
+		if(evt.getButton() == MouseEvent.BUTTON1) {
+			drawer.addGuard(evt.getX(), evt.getY());
+		}
+		if(evt.getButton() == MouseEvent.BUTTON3 ) {
+			for (int i = drawer.getGuardList().size()-1; i >= 0; i--) {
+				if(mouseOverComponent(drawer.getGuardList().get(i), evt.getX(), evt.getY())){
+					drawer.removeGuard(drawer.getGuardList().get(i));
+				}
+			}
+		}
+	}
+	
+	private boolean mouseOverComponent(Guard guard, int x, int y) {
+		return guard.getX()-15 <= x-drawer.getTransformX()
+			&& guard.getX()+15 >= x-drawer.getTransformX()
+			&& guard.getY()-15 <= -(y-drawer.getTransformY()) 
+			&& guard.getY()+15 >= -(y-drawer.getTransformY());
 	}
 
 	@Override

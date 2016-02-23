@@ -11,6 +11,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -28,8 +30,10 @@ public class Drawer extends JPanel {
 	private JTextArea initialTextArea;
 	private DragAndDropListener listener;
 	private Reader reader;
+	private Intersection intersection;
+	private Menubar menubar;
 	
-	private int scale = 15;
+	private int scale = 30;
 	private int translateX;
 	private int translateY;
 	
@@ -37,6 +41,20 @@ public class Drawer extends JPanel {
 	private int smallestX;
 	private int biggestY;
 	private int smallestY;
+	
+	private double transformX;
+	private double transformY;
+	
+	private ArrayList<Guard> guardList = new ArrayList<Guard>();
+	private ArrayList<Line2D> lineList = new ArrayList<Line2D>();
+	private ArrayList<Path2D> pathList = new ArrayList<Path2D>();
+	private ArrayList<IntersectPoint> intersectList = new ArrayList<IntersectPoint>();
+	
+	private int galleryNumber;
+	
+	Line2D testLine = new Line2D.Double(100,100,200,200);
+	
+	private double[][] galleryPoints;
 	
 	public Drawer() {
 		listener = new DragAndDropListener(this);
@@ -46,15 +64,18 @@ public class Drawer extends JPanel {
 		reader = new Reader();
 		reader.readData();
 		
+		intersection = new Intersection();
+		
 		f = new JFrame();
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.add(this);
 	    f.setTitle("Shots on Jamie");
 	    f.setSize(900, 800);
-	    f.setResizable(false);
+	    //f.setResizable(false);
 	    //f.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 	    
-	    addMenuBar();
+	    menubar = new Menubar(f, this);
+	    menubar.addMenuBar();
 	    
 	    addCoordinates(0,0,0,0);
 	    f.setVisible(true);
@@ -67,38 +88,83 @@ public class Drawer extends JPanel {
 	    repaint();
 	}
 	
-	public void addMenuBar() {
+	public void drawLine() {
+		Line2D tempLine;
+		double angle;
 		
-		JMenuBar menuBar = new JMenuBar();
-		f.setJMenuBar(menuBar);
-		
-		JMenu file = new JMenu("File");
-		menuBar.add(file);
-		JMenuItem open = new JMenuItem("Open");
-		file.add(open);
-		
-		open.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
+		for (int i = 0; i < guardList.size(); i++) {
+			intersectList.clear();
+			for (int j = 0; j < galleryPoints.length; j++) {
+				angle = Math.atan2(galleryPoints[j][1]-guardList.get(i).getY(),galleryPoints[j][0]-guardList.get(i).getX());
+				tempLine = new Line2D.Double(guardList.get(i).getX(), guardList.get(i).getY(), guardList.get(i).getX() + Math.cos(angle-0.0000001) * 500, guardList.get(i).getY() + Math.sin(angle-0.0000001) * 500);
+				testAndCreateIntersection(guardList.get(i).getX(), guardList.get(i).getY(), path, tempLine, angle-0.0000001);
 				
-				try {
-					
-					String name = JOptionPane.showInputDialog("Number:");
-					
-					drawGallery(Integer.parseInt(name));
-
-				}	catch (Exception e) {
-					e.printStackTrace();
-				}
+				tempLine = new Line2D.Double(guardList.get(i).getX(), guardList.get(i).getY(), galleryPoints[j][0], galleryPoints[j][1]);
+				testAndCreateIntersection(guardList.get(i).getX(), guardList.get(i).getY(), path, tempLine, angle);
 				
+				tempLine = new Line2D.Double(guardList.get(i).getX(), guardList.get(i).getY(), guardList.get(i).getX() + Math.cos(angle+0.0000001) * 500, guardList.get(i).getY() + Math.sin(angle+0.0000001) * 500);
+				testAndCreateIntersection(guardList.get(i).getX(), guardList.get(i).getY(), path, tempLine, angle+0.0000001);
 			}
-		});
+			
+			guardList.get(i).setIntersectList(intersectList);
+		}
+	}
+	
+	public void testAndCreateIntersection(double x, double y, Path2D path, Line2D tempLine, double angle) {
+		ArrayList<Point2D> tempList = new ArrayList<Point2D>();
+		tempList.clear();
+		
+		try {
+			tempList = intersection.getIntersections(path, tempLine);
+		} catch (Exception e) {}
+		
+		double minimum = 0;
+		double distance = 0;
+		Point2D tempPoint = null;
+		for (Point2D points : tempList) {
+			distance = calculateDistance(tempLine.getX1(), tempLine.getY1(), points.getX(), points.getY());
+			if (minimum == 0 || minimum > distance) {
+				minimum = distance;
+				tempPoint = points;
+			}
+		}
+		
+		intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
+		tempLine = new Line2D.Double(x, y, tempPoint.getX(), tempPoint.getY());
+		lineList.add(tempLine);
+	}
+	
+	public void createLineOfSight() {
+		Path2D tempPath = new Path2D.Double();
+		for (int i = 0; i < guardList.size(); i++) {
+			Collections.sort(guardList.get(i).getIntersectList(), new AngleComparator());
+			tempPath.moveTo(guardList.get(i).getIntersectList().get(0).getX(), guardList.get(i).getIntersectList().get(0).getY());
+			for (int j = 1; j < guardList.get(i).getIntersectList().size(); j++) {
+				tempPath.lineTo(guardList.get(i).getIntersectList().get(j).getX(), guardList.get(i).getIntersectList().get(j).getY());
+			}
+			tempPath.closePath();
+			pathList.add(tempPath);
+		}
+	}
+			
+	
+	public double calculateDistance(double x1, double y1, double x2, double y2) {
+		double distance = Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2));
+		
+		return distance;
 	}
 	
 	public void drawGallery(int number) {
-		double[][] points;
+		scale = 60;
+		galleryNumber = number;
+		galleryPoints = reader.getData(number);
 		
-		points = reader.getData(number);
-		setPolygon(points);
+		setPolygon(galleryPoints);
+		
+		guardList.clear();
+		pathList.clear();
+		lineList.clear();
+		intersectList.clear();
 	}
 	
 	public void setPolygon(double[][] points) {
@@ -116,30 +182,41 @@ public class Drawer extends JPanel {
 	       if (points[i][0] < smallestX) smallestX = (int) points[i][0];
 	       if (points[i][1] > biggestY) biggestY = (int) points[i][1];
 	       if (points[i][1] < smallestY) smallestY = (int) points[i][1];
-	       
 	    }
 	    
 	    path.closePath();
 	    
 	    translateX = (biggestX - smallestX)*scale;
 	    translateY = (biggestY - smallestY)*scale;
-	    
-	    f.setSize(translateX+100, translateY+100);
+	    	    
+	    f.setSize(translateX+(-smallestX*scale)+120, translateY+120);
 	    
 	    removeAll();
 	    repaint();
 	    
+	    if (translateX > 1000 || translateY > 750) {
+	    	scale = --scale;
+	    	setPolygon(galleryPoints);
+	    	return;
+	    }
+	    
+	    for(int i = 0; i < galleryPoints.length; i++) {
+	    	for(int j = 0; j < galleryPoints[i].length; j++) {
+	    		galleryPoints[i][j] = galleryPoints[i][j]*scale;
+	    	}
+	    }
+	    
 	}
 	  
 	public void addCoordinates(int x, int y, double xCo, double yCo) {
-		xCo = (xCo+(smallestX*scale)-30)/scale;
-		yCo = -((yCo-(smallestY*scale)+15-(getHeight()))/scale);
+		xCo = (xCo+(smallestX*scale)-45)/scale;
+		yCo = -((yCo-(smallestY*scale)+30-(getHeight()))/scale);
 	  
 		initialTextArea = new JTextArea(0, 20);
 		initialTextArea.setEditable(false);
 		initialTextArea.setOpaque(false);
 		initialTextArea.setFont(new Font("Arial", Font.BOLD, 12));
-		initialTextArea.setBounds(x-(initialTextArea.getWidth()/2)+13,y-(initialTextArea.getHeight()/2)+5,100,20);
+		initialTextArea.setBounds(x-(initialTextArea.getWidth()/2)+13,y-(initialTextArea.getHeight()/2)+5,200,20);
   
 		initialTextArea.setText("X: " + xCo + ", Y: " + yCo);
 		
@@ -151,6 +228,47 @@ public class Drawer extends JPanel {
 		repaint();
 	}
 	
+	public void addGuard(double x, double y) {
+		guardList.add(new Guard((x-((-smallestX*scale)+45)), -(y-(getHeight()+(smallestY*scale)-30))));
+		
+		pathList.clear();
+		lineList.clear();
+		intersectList.clear();
+		
+		drawLine();
+		createLineOfSight();
+		
+		removeAll();
+		revalidate();
+		repaint();
+	}
+	
+	public void removeGuard(Guard guard) {
+		guardList.remove(guard);
+		
+		pathList.clear();
+		lineList.clear();
+		intersectList.clear();
+		
+		drawLine();
+		createLineOfSight();
+		
+		removeAll();
+		repaint();
+	}
+	
+	public ArrayList<Guard> getGuardList() {
+		return guardList;
+	}
+	
+	public double getTransformX() {
+		return transformX;
+	}
+	
+	public double getTransformY() {
+		return transformY;
+	}
+	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 			
@@ -158,19 +276,40 @@ public class Drawer extends JPanel {
 		
 		AffineTransform old = g2d.getTransform();
 		
+		g2d.setBackground(Color.WHITE);
+		
 		// update graphics object with the inverted y-transform
 		
+		
 		g2d.translate(0, getHeight());
-		g2d.translate((-smallestX*scale)+30, (smallestY*scale)-15);
+		g2d.translate((-smallestX*scale)+45, (smallestY*scale)-30);
 		g2d.scale(1, -1);
 		
 		g2d.setColor(Color.BLACK);
 		g2d.fill(path);
 		
-		g2d.dispose();
+		g2d.setColor(Color.RED);
+		for (Path2D los : pathList) {
+			g2d.fill(los);
+		}
+		
+		g2d.setColor(Color.YELLOW);
+		for (Line2D line : lineList) {
+			g2d.draw(line);
+		}
+		
+		g2d.setColor(Color.RED);
+		for (Guard guard : guardList) {
+			g2d.fillOval((int)guard.getX()-scale/10, (int)guard.getY()-scale/10, scale/5, scale/5);
+		}
+		
 		g2d.setTransform(old);
+		g2d.dispose();
+		
 		
 		add(initialTextArea);
+	    transformX = (-smallestX*scale)+45;
+	    transformY = (getHeight()+(smallestY*scale)-30);
 	}
 	  
     public static void main(String[] args) {

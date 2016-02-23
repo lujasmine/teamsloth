@@ -7,9 +7,6 @@ public class Reader {
 	final int numberOfQuestions = 31;
 	String[] coordList = new String[numberOfQuestions]; //Coordinate list for each question
 	int[] coordListSize = new int[numberOfQuestions]; //Number of points in each question
-	
-	public void Reader() {
-	}
 
 	public void readData() {
 		int eachQuestion = 0; //Counter value for each question
