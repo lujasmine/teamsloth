@@ -62,6 +62,7 @@ public class Drawer extends JPanel {
 		
 		reader = new Reader();
 		reader.readData(1);
+		reader.readData(2);
 		
 		intersection = new Intersection();
 		
@@ -161,9 +162,6 @@ public class Drawer extends JPanel {
 		setPolygon(galleryPoints);
 		
 		guardList.clear();
-		pathList.clear();
-		lineList.clear();
-		intersectList.clear();
 	}
 	
 	public int getGalleryNumber(){
