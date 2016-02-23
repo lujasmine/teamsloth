@@ -14,6 +14,7 @@ public class DragAndDropListener implements MouseListener, MouseMotionListener {
 	@Override
 	public void mousePressed(MouseEvent evt) {
 		if(evt.getButton() == MouseEvent.BUTTON1) {
+			System.out.println(evt.getX() + ", " + evt.getY());
 			drawer.addGuard(evt.getX(), evt.getY());
 		}
 		if(evt.getButton() == MouseEvent.BUTTON3 ) {

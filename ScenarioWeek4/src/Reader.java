@@ -93,28 +93,31 @@ public class Reader {
 					}
 				}
 			}
-			double x=0;
-			double y=0;
-			counter=0;
-			counterTwo=0;
-			System.out.println("Guard list: " + guardList[questionNumber]);
-			for (String pair : guardList[questionNumber].split("\\(|\\,|\\)")) {
-				if(pair.matches("\\-?(\\d+|\\d+\\.\\d+)")==true){
-					if(counter % 2 ==0){
-						counter++;
-						x = Double.parseDouble(pair); //Get x coord of guard
-					}
-					else{
-						counter++;
-						y = Double.parseDouble(pair); //Get y coord of guard
-					}
-					if(counter%2 == 0){
-						System.out.println("Guard added at x:" + x + "y:" + y);
-						//drawer.addGuard(x,y); //Uncomment this when bug is fixed!
-					}
+		return points;
+		}
+	}
+	
+	public void getGuard(int questionNumber){
+		double x=0;
+		double y=0;
+		int counter=0;
+		System.out.println("Guard list: " + guardList[questionNumber]);
+		for (String pair : guardList[questionNumber].split("\\(|\\,|\\)")) {
+			if(pair.matches("\\-?(\\d+|\\d+\\.\\d+)")==true){
+				if(counter % 2 ==0){
+					counter++;
+					x = Double.parseDouble(pair); //Get x coord of guard
+				}
+				else{
+					counter++;
+					y = Double.parseDouble(pair); //Get y coord of guard
+				}
+				if(counter%2 == 0){
+					System.out.println("Guard added at x:" + x + "y:" + y);
+					//(y*drawer.getScale()+30)+drawer.getFrameHeight()
+					drawer.addGuard(x*drawer.getScale()+45,((y+30*drawer.getScale())-drawer.getFrameHeight())); //Uncomment this when bug is fixed!
 				}
 			}
-			return points;
 		}
 	}
 	

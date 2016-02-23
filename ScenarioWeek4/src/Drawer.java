@@ -63,7 +63,6 @@ public class Drawer extends JPanel {
 		reader = new Reader(this);
 		reader.readData(1);
 		reader.readData(2);
-		
 		intersection = new Intersection();
 		
 		f = new JFrame();
@@ -166,6 +165,11 @@ public class Drawer extends JPanel {
 		setPolygon(galleryPoints);
 		
 		guardList.clear();
+		removeAll();
+	    repaint();
+		if (part == 2) reader.getGuard(questionNumber);
+		
+	    
 	}
 	
 	public int getGalleryNumber(){
@@ -197,9 +201,6 @@ public class Drawer extends JPanel {
 	    	    
 	    f.setSize(translateX+(-smallestX*scale)+120, translateY+120);
 	    
-	    removeAll();
-	    repaint();
-	    
 	    if (translateX > 1000 || translateY > 750) {
 	    	scale--;
 	    	setPolygon(galleryPoints);
@@ -211,6 +212,7 @@ public class Drawer extends JPanel {
 	    		galleryPoints[i][j] = galleryPoints[i][j]*scale;
 	    	}
 	    }
+	    
 	    
 	}
 	  
@@ -236,6 +238,7 @@ public class Drawer extends JPanel {
 	
 	public void addGuard(double x, double y) {
 		Guard guard = new Guard((x-((-smallestX*scale)+45)), -(y-(getHeight()+(smallestY*scale)-30)));
+		System.out.println("x:" + guard.getX() + ", " + " y: "+ guard.getY());
 		guardList.add(guard);
 		
 		drawLine(guard);
@@ -262,6 +265,14 @@ public class Drawer extends JPanel {
 	
 	public double getTransformY() {
 		return transformY;
+	}
+	
+	public double getScale() {
+		return scale;
+	}
+	
+	public int getFrameHeight() {
+		return getHeight();
 	}
 	
 	public void paintComponent(Graphics g) {
