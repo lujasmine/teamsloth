@@ -27,6 +27,23 @@ public class Menubar {
 		menuBar.add(file);
 		JMenuItem open = new JMenuItem("Open");
 		file.add(open);
+		JMenuItem export = new JMenuItem("Export");
+		file.add(export);
+		
+		export.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				File file = new File(Drawer.galleryNumber + ".txt");
+			    try {
+					file.createNewFile();
+				    FileWriter writer = new FileWriter(file); 
+				    writer.write("sloth\nrl5qgj5n4mc68qsekeig4j4jfs\n"); 
+				    writer.flush();
+				    writer.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		
 		open.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

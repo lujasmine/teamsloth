@@ -50,7 +50,7 @@ public class Drawer extends JPanel {
 	private ArrayList<Path2D> pathList = new ArrayList<Path2D>();
 	private ArrayList<IntersectPoint> intersectList = new ArrayList<IntersectPoint>();
 	
-	private int galleryNumber;
+	static int galleryNumber;
 	
 	Line2D testLine = new Line2D.Double(100,100,200,200);
 	
