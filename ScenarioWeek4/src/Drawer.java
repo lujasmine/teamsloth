@@ -118,7 +118,9 @@ public class Drawer extends JPanel {
 		
 		try {
 			tempList = intersection.getIntersections(path, tempLine);
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			System.out.println("Error getting intersections");
+		}
 		
 		double minimum = 0;
 		double distance = 0;
@@ -131,9 +133,11 @@ public class Drawer extends JPanel {
 			}
 		}
 		
-		intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
-		tempLine = new Line2D.Double(x, y, tempPoint.getX(), tempPoint.getY());
-		guard.addToLineList(tempLine);
+		try {
+			intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
+			tempLine = new Line2D.Double(x, y, tempPoint.getX(), tempPoint.getY());
+			guard.addToLineList(tempLine);
+		} catch (Exception e) {}
 	}
 	
 	public void createLineOfSight(Guard guard) {
@@ -279,27 +283,26 @@ public class Drawer extends JPanel {
 		g2d.setColor(Color.BLACK);
 		g2d.fill(path);
 		
-		/*g2d.setColor(Color.RED);
-		for (Path2D los : pathList) {
-			g2d.fill(los);
-		}*/
-		
 		g2d.setColor(Color.RED);
 		for (Guard guard : guardList) {
-			g2d.fill(guard.getLineOfSight());
+			if (guard.getLineOfSight() != null) {
+				g2d.fill(guard.getLineOfSight());
+			}
 		}
 		
 		g2d.setColor(Color.YELLOW);
 		for (Guard guard : guardList) {
+			if (guard.getLineList() != null) {
 			ArrayList<Line2D> tempList = guard.getLineList();
 			for (Line2D line : tempList) {
 				g2d.draw(line);
+			}
 			}
 		}
 		
 		g2d.setColor(Color.BLUE);
 		for (Guard guard : guardList) {
-			g2d.fillOval((int)guard.getX()-scale/10, (int)guard.getY()-scale/10, scale/5, scale/5);
+			g2d.fillOval((int)(guard.getX()-scale/10), (int)(guard.getY()-scale/10), scale/5, scale/5);
 		}
 		
 		g2d.setTransform(old);
