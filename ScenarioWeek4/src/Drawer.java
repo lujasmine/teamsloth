@@ -47,7 +47,6 @@ public class Drawer extends JPanel {
 	
 	private ArrayList<Guard> guardList = new ArrayList<Guard>();
 	private ArrayList<Line2D> lineList = new ArrayList<Line2D>();
-	private ArrayList<Path2D> pathList = new ArrayList<Path2D>();
 	private ArrayList<IntersectPoint> intersectList = new ArrayList<IntersectPoint>();
 	
 	static int galleryNumber;
@@ -88,29 +87,31 @@ public class Drawer extends JPanel {
 	    repaint();
 	}
 	
-	public void drawLine() {
+	public void drawLine(Guard guard) {
 		Line2D tempLine;
 		double angle;
 		
-		for (int i = 0; i < guardList.size(); i++) {
+		//for (int i = 0; i < guardList.size(); i++) {
 			intersectList.clear();
+			lineList.clear();
 			for (int j = 0; j < galleryPoints.length; j++) {
-				angle = Math.atan2(galleryPoints[j][1]-guardList.get(i).getY(),galleryPoints[j][0]-guardList.get(i).getX());
-				tempLine = new Line2D.Double(guardList.get(i).getX(), guardList.get(i).getY(), guardList.get(i).getX() + Math.cos(angle-0.0000001) * 500, guardList.get(i).getY() + Math.sin(angle-0.0000001) * 500);
-				testAndCreateIntersection(guardList.get(i).getX(), guardList.get(i).getY(), path, tempLine, angle-0.0000001);
+				angle = Math.atan2(galleryPoints[j][1]-guard.getY(),galleryPoints[j][0]-guard.getX());
+				tempLine = new Line2D.Double(guard.getX(), guard.getY(), guard.getX() + Math.cos(angle-0.0000001) * 500, guard.getY() + Math.sin(angle-0.0000001) * 500);
+				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle-0.0000001);
 				
-				tempLine = new Line2D.Double(guardList.get(i).getX(), guardList.get(i).getY(), galleryPoints[j][0], galleryPoints[j][1]);
-				testAndCreateIntersection(guardList.get(i).getX(), guardList.get(i).getY(), path, tempLine, angle);
+				tempLine = new Line2D.Double(guard.getX(), guard.getY(), galleryPoints[j][0], galleryPoints[j][1]);
+				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle);
 				
-				tempLine = new Line2D.Double(guardList.get(i).getX(), guardList.get(i).getY(), guardList.get(i).getX() + Math.cos(angle+0.0000001) * 500, guardList.get(i).getY() + Math.sin(angle+0.0000001) * 500);
-				testAndCreateIntersection(guardList.get(i).getX(), guardList.get(i).getY(), path, tempLine, angle+0.0000001);
+				tempLine = new Line2D.Double(guard.getX(), guard.getY(), guard.getX() + Math.cos(angle+0.0000001) * 500, guard.getY() + Math.sin(angle+0.0000001) * 500);
+				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle+0.0000001);
 			}
 			
-			guardList.get(i).setIntersectList(intersectList);
-		}
+			guard.setIntersectList(intersectList);
+			createLineOfSight(guard);
+		//}
 	}
 	
-	public void testAndCreateIntersection(double x, double y, Path2D path, Line2D tempLine, double angle) {
+	public void testAndCreateIntersection(Guard guard, double x, double y, Path2D path, Line2D tempLine, double angle) {
 		ArrayList<Point2D> tempList = new ArrayList<Point2D>();
 		tempList.clear();
 		
@@ -131,20 +132,18 @@ public class Drawer extends JPanel {
 		
 		intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
 		tempLine = new Line2D.Double(x, y, tempPoint.getX(), tempPoint.getY());
-		lineList.add(tempLine);
+		guard.addToLineList(tempLine);
 	}
 	
-	public void createLineOfSight() {
+	public void createLineOfSight(Guard guard) {
 		Path2D tempPath = new Path2D.Double();
-		for (int i = 0; i < guardList.size(); i++) {
-			Collections.sort(guardList.get(i).getIntersectList(), new AngleComparator());
-			tempPath.moveTo(guardList.get(i).getIntersectList().get(0).getX(), guardList.get(i).getIntersectList().get(0).getY());
-			for (int j = 1; j < guardList.get(i).getIntersectList().size(); j++) {
-				tempPath.lineTo(guardList.get(i).getIntersectList().get(j).getX(), guardList.get(i).getIntersectList().get(j).getY());
-			}
-			tempPath.closePath();
-			pathList.add(tempPath);
+		Collections.sort(guard.getIntersectList(), new AngleComparator());
+		tempPath.moveTo(guard.getIntersectList().get(0).getX(), guard.getIntersectList().get(0).getY());
+		for (int j = 1; j < guard.getIntersectList().size(); j++) {
+			tempPath.lineTo(guard.getIntersectList().get(j).getX(), guard.getIntersectList().get(j).getY());
 		}
+		tempPath.closePath();
+		guard.setLineOfSight(tempPath);
 	}
 			
 	
@@ -162,9 +161,6 @@ public class Drawer extends JPanel {
 		setPolygon(galleryPoints);
 		
 		guardList.clear();
-		pathList.clear();
-		lineList.clear();
-		intersectList.clear();
 	}
 	
 	public void setPolygon(double[][] points) {
@@ -195,7 +191,7 @@ public class Drawer extends JPanel {
 	    repaint();
 	    
 	    if (translateX > 1000 || translateY > 750) {
-	    	scale = --scale;
+	    	scale--;
 	    	setPolygon(galleryPoints);
 	    	return;
 	    }
@@ -229,14 +225,10 @@ public class Drawer extends JPanel {
 	}
 	
 	public void addGuard(double x, double y) {
-		guardList.add(new Guard((x-((-smallestX*scale)+45)), -(y-(getHeight()+(smallestY*scale)-30))));
+		Guard guard = new Guard((x-((-smallestX*scale)+45)), -(y-(getHeight()+(smallestY*scale)-30)));
+		guardList.add(guard);
 		
-		pathList.clear();
-		lineList.clear();
-		intersectList.clear();
-		
-		drawLine();
-		createLineOfSight();
+		drawLine(guard);
 		
 		removeAll();
 		revalidate();
@@ -245,13 +237,6 @@ public class Drawer extends JPanel {
 	
 	public void removeGuard(Guard guard) {
 		guardList.remove(guard);
-		
-		pathList.clear();
-		lineList.clear();
-		intersectList.clear();
-		
-		drawLine();
-		createLineOfSight();
 		
 		removeAll();
 		repaint();
@@ -288,17 +273,25 @@ public class Drawer extends JPanel {
 		g2d.setColor(Color.BLACK);
 		g2d.fill(path);
 		
-		g2d.setColor(Color.RED);
+		/*g2d.setColor(Color.RED);
 		for (Path2D los : pathList) {
 			g2d.fill(los);
+		}*/
+		
+		g2d.setColor(Color.RED);
+		for (Guard guard : guardList) {
+			g2d.fill(guard.getLineOfSight());
 		}
 		
 		g2d.setColor(Color.YELLOW);
-		for (Line2D line : lineList) {
-			g2d.draw(line);
+		for (Guard guard : guardList) {
+			ArrayList<Line2D> tempList = guard.getLineList();
+			for (Line2D line : tempList) {
+				g2d.draw(line);
+			}
 		}
 		
-		g2d.setColor(Color.RED);
+		g2d.setColor(Color.BLUE);
 		for (Guard guard : guardList) {
 			g2d.fillOval((int)guard.getX()-scale/10, (int)guard.getY()-scale/10, scale/5, scale/5);
 		}
