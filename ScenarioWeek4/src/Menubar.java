@@ -28,19 +28,22 @@ public class Menubar {
 		
 		JMenu file = new JMenu("File");
 		menuBar.add(file);
-		JMenuItem open = new JMenuItem("Open");
-		file.add(open);
+		JMenuItem open1 = new JMenuItem("Open question for part 1");
+		file.add(open1);
+		JMenuItem open2 = new JMenuItem("Open question for part 2");
+		file.add(open2);
 		JMenuItem export = new JMenuItem("Export");
 		file.add(export);
 		
 		export.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				File file = new File("Question " + Drawer.galleryNumber + " answer.txt");
+				int galleryNumber = drawer.getGalleryNumber();
+				File file = new File("Question" + galleryNumber + "answer.txt");
 			    try {
 					file.createNewFile();
 				    FileWriter writer = new FileWriter(file); 
 				    writer.write("sloth\nrl5qgj5n4mc68qsekeig4j4jfs\n"); 
-				    writer.write(Drawer.galleryNumber+": ");
+				    writer.write(galleryNumber+": ");
 				    writer.flush();
 				    writer.close();
 				} catch (IOException e) {
@@ -49,13 +52,28 @@ public class Menubar {
 			}
 		});
 		
-		open.addActionListener(new ActionListener() {
+		open1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
 				try {
 					
-					String name = JOptionPane.showInputDialog("Number:");
-					drawer.drawGallery(Integer.parseInt(name));
+					String name = JOptionPane.showInputDialog("Question Number:");
+					drawer.drawGallery(Integer.parseInt(name), 1);
+
+				}	catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+		});
+		
+		open2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				try {
+					
+					String name = JOptionPane.showInputDialog("Question Number:");
+					drawer.drawGallery(Integer.parseInt(name), 2);
 
 				}	catch (Exception e) {
 					e.printStackTrace();
