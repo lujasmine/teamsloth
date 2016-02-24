@@ -166,6 +166,18 @@ public class Drawer extends JPanel {
 	public int getGalleryNumber(){
 		return galleryNumber;
 	}
+	
+	public double getGuardX(int id){
+		return (guardList.get(id).getX()/(scale+smallestX));
+	}
+	
+	public double getGuardY(int id){
+		return (guardList.get(id).getY()/(scale+smallestY));
+	}
+	
+	public int getGuardListSize(){
+		return guardList.size();
+	}
 
 	
 	public void setPolygon(double[][] points) {
@@ -238,7 +250,7 @@ public class Drawer extends JPanel {
 	
 	public void addGuard(double x, double y) {
 		Guard guard = new Guard(x, y);
-		System.out.println("x:" + guard.getX() + ", " + " y: "+ guard.getY());
+		//System.out.println("x:" + guard.getX() + ", " + " y: "+ guard.getY());
 		guardList.add(guard);
 		
 		drawLine(guard);

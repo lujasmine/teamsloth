@@ -15,6 +15,7 @@ public class Menubar {
 	
 	JFrame f;
 	Drawer drawer;
+	private int part = 0;
 	
 	public Menubar(JFrame f, Drawer drawer) {
 		this.f = f;
@@ -32,24 +33,49 @@ public class Menubar {
 		file.add(open1);
 		JMenuItem open2 = new JMenuItem("Open question for part 2");
 		file.add(open2);
-		JMenuItem export = new JMenuItem("Export");
-		file.add(export);
+		JMenuItem export1 = new JMenuItem("Export for part 1");
+		file.add(export1);
 		
-		export.addActionListener(new ActionListener() {
+		export1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int galleryNumber = drawer.getGalleryNumber();
-				File file = new File("Question" + galleryNumber + "answer.txt");
-			    try {
-					file.createNewFile();
-				    FileWriter writer = new FileWriter(file); 
-				    writer.write("sloth\nrl5qgj5n4mc68qsekeig4j4jfs\n"); 
-				    writer.write(galleryNumber+": ");
-				    writer.flush();
-				    writer.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+				if(part == 1){
+					int galleryNumber = drawer.getGalleryNumber();
+					int guardListSize = drawer.getGuardListSize();
+					if(guardListSize>0){
+						File file = new File("Question" + galleryNumber + "answer.txt");
+					    try {
+							file.createNewFile();
+						    FileWriter writer = new FileWriter(file); 
+						    writer.write("sloth\nrl5qgj5n4mc68qsekeig4j4jfs\n"); 
+						    writer.write(galleryNumber+": ");
+						    for(int eachGuard = 0; eachGuard < guardListSize; eachGuard++){
+						    	double x = drawer.getGuardX(eachGuard);
+						    	double y = drawer.getGuardY(eachGuard);
+						    	if(eachGuard == guardListSize-1){
+						    		writer.write("(" + x + ", " + y + ")");
+						    	}
+						    	else{
+						    		writer.write("(" + x + ", " + y + "),");
+						    	}
+						    }
+						    writer.flush();
+						    writer.close();
+						    JOptionPane.showMessageDialog(f,  "Export successful as 'Question" + galleryNumber + "answer.txt'.");
+					    } catch (IOException e) {
+						e.printStackTrace();
+					    }
+					}
+					else{
+						JOptionPane.showMessageDialog(f, "No guards have been input!", "Error", JOptionPane.ERROR_MESSAGE);
+					}
 				}
-			}
+				else{
+					JOptionPane.showMessageDialog(f,
+						    "You have not opened a part 1 question.",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+				}
+			}		
 		});
 		
 		open1.addActionListener(new ActionListener() {
@@ -58,7 +84,8 @@ public class Menubar {
 				try {
 					
 					String name = JOptionPane.showInputDialog("Question Number:");
-					drawer.drawGallery(Integer.parseInt(name), 1);
+					part = 1;
+					drawer.drawGallery(Integer.parseInt(name), part);
 
 				}	catch (Exception e) {
 					e.printStackTrace();
@@ -73,7 +100,8 @@ public class Menubar {
 				try {
 					
 					String name = JOptionPane.showInputDialog("Question Number:");
-					drawer.drawGallery(Integer.parseInt(name), 2);
+					part = 2;
+					drawer.drawGallery(Integer.parseInt(name), part);
 
 				}	catch (Exception e) {
 					e.printStackTrace();
