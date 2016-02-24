@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class ArtGallery {
 	//double galleryPoints[][] = {{5, 2}, {4.5, 1}, {4, 1}, {3.5, 2}, {3, 1}, {2.5, 1}, {2, 2}, {1.5, 1}, {1, 1}, {0.5, 2}, {0, 0}, {5, 0}};
 	//double galleryPoints[][] = {{10, 5}, {9, 5}, {9, 7}, {8, 7}, {8, 5}, {6, 5}, {6, 7}, {5, 7}, {5, 3}, {4, 3}, {4, 5}, {3, 5}, {3, 3}, {2, 3}, {2, 7}, {1, 7}, {1, 6}, {0, 6}, {0, 10}, {-1, 10}, {-1, 9}, {-3, 9}, {-3, 8}, {-1, 8}, {-1, 6}, {-4, 6}, {-4, 5}, {-3, 5}, {-3, 4}, {-7, 4}, {-7, 3}, {-6, 3}, {-6, 2}, {-11, 2}, {-11, 1}, {-10, 1}, {-10, -1}, {-9, -1}, {-9, 1}, {-8, 1}, {-8, -1}, {-7, -1}, {-7, 1}, {-6, 1}, {-6, -2}, {-5, -2}, {-5, 3}, {-3, 3}, {-3, 0}, {-2, 0}, {-2, 5}, {-1, 5}, {-1, 3}, {0, 3}, {0, 5}, {1, 5}, {1, 1}, {0, 1}, {0, 0}, {1, 0}, {1, -1}, {-2, -1}, {-2, -2}, {-1, -2}, {-1, -3}, {-3, -3}, {-3, -4}, {-1, -4}, {-1, -5}, {0, -5}, {0, -2}, {1, -2}, {1, -3}, {2, -3}, {2, -2}, {3, -2}, {3, -4}, {4, -4}, {4, -2}, {5, -2}, {5, -1}, {2, -1}, {2, 0}, {3, 0}, {3, 1}, {2, 1}, {2, 2}, {7, 2}, {7, 3}, {6, 3}, {6, 4}, {10, 4}};
-	ArrayList<Line2D> edges = new ArrayList<Line2D>();
+	ArrayList<Line2D.Double> edges = new ArrayList<Line2D.Double>();
 	ArrayList<Node> nodes = new ArrayList<Node>();
 	ArrayList<Point2D> guardPoints = new ArrayList<Point2D>();
 	
@@ -16,26 +16,29 @@ public class ArtGallery {
 	
 	public ArtGallery() {
 		reader.readData();
-		galleryPoints = reader.getData(25);
+		galleryPoints = reader.getData(20);
 		
 		createNodesAndEdges();
 		calculateNodeAngleRanges();
-		createConnections();
-		placeGuards();
-		//if (checkPossibleConnection(nodes.get(0), nodes.get(14))) System.out.println("HI");;
+		//createConnections();
+		//placeGuards();
+		if (checkPossibleConnection(nodes.get(24), nodes.get(13))) System.out.println("HI");;
+		System.out.println(nodes.get(13).getX() + " " + nodes.get(13).getY());
+		//for (Node node : nodes.get(0).getConnectedNodes()) {
+		//	System.out.println(node.getX() + " " + node.getY());
+		//}
 		
-		for (Node node : nodes.get(1).getConnectedNodes()) {
-			System.out.println(node.getX() + " " + node.getY());
-		}
-			
-		/*for (Point2D point : guardPoints) {
+		//System.out.println(nodes.get(0).getConnectedNodes().size());
+		//System.out.println(nodes.get(35).getConnectedNodes().size());
+		
+		for (Point2D point : guardPoints) {
 			System.out.println(point);
-		}*/
+		}
 		System.out.println("Number of Guards: " + guardPoints.size());
 	}
 	
 	public void createNodesAndEdges() {
-		Line2D tempLine;
+		Line2D.Double tempLine;
 		for (int i = 0; i < galleryPoints.length; i++)
 			nodes.add(new Node(galleryPoints[i][0], galleryPoints[i][1]));
 		for (int i = 0; i < nodes.size(); i++) {
@@ -56,20 +59,62 @@ public class ArtGallery {
 		for (Node node: nodes) {
 			double angle1 = Math.atan2(node.getConnectedNodes().get(0).getX() - node.getX(), node.getConnectedNodes().get(0).getY() - node.getY());
 			if (angle1 < 0) angle1 = angle1 + 2*Math.PI;
-			if (angle1  == 0) angle1  = 2*Math.PI;
+			//if (angle1  == 0) angle1  = 2*Math.PI;
+			angle1 = Math.toDegrees(angle1);
 			double angle2 = Math.atan2(node.getConnectedNodes().get(1).getX() - node.getX(), node.getConnectedNodes().get(1).getY() - node.getY());
 			if (angle2 < 0) angle2 = angle2 + 2*Math.PI;
-			if (angle2 == 0) angle2 = 2*Math.PI;
+			//if (angle2 == 0) angle2 = 2*Math.PI;
+			angle2 = Math.toDegrees(angle2);
 			
 			if (angle1 > angle2) {
-				node.setAngleOne(angle1);
-				node.setAngleTwo(angle2);
+				if (angleRangeCheck(node, angle1, angle2)) {
+					angle2 = angle2 + 360;
+					node.setAngleOne(angle2);
+					node.setAngleTwo(angle1);
+				} else {
+					//angle1 = angle1 + 360;
+					node.setAngleOne(angle1);
+					node.setAngleTwo(angle2);
+				}
 			} else {
-				node.setAngleOne(angle2);
-				node.setAngleTwo(angle1);
+				if (angleRangeCheck(node, angle2, angle1)) {
+					angle1 = angle1 + 360;
+					node.setAngleOne(angle1);
+					node.setAngleTwo(angle2);
+				} else {
+					//angle2 = angle2 + 360;
+					node.setAngleOne(angle2);
+					node.setAngleTwo(angle1);
+				}
 			}
 		}
 	}
+	
+	public boolean angleRangeCheck(Node node, double angle1, double angle2) {
+		double tempAngle = (angle1-angle2)/2;
+		Line2D.Double tempLine = new Line2D.Double(node.getX(), node.getY(), node.getX() + Math.cos(tempAngle) * 1000, node.getY() + Math.sin(tempAngle) * 1000);
+		int intersectCounter = 0;
+		for (int i = 0; i < edges.size(); i++) {
+			if (testIntersection(tempLine, edges.get(i))) {
+				if (!nodeIntersect(tempLine, edges.get(i))) intersectCounter++;
+			}
+		}
+		if (intersectCounter%2 == 0) return true;
+		else return false;
+	}
+	
+	public boolean nodeIntersect(Line2D.Double line1, Line2D.Double line2) {
+		for (int j = 0; j < nodes.size(); j++) {
+			Point2D.Double tempPoint = getIntersectionPoint(line1, line2);
+			//System.out.println(tempPoint);
+			if (precisionCheck(tempPoint, nodes.get(j)) || Double.isNaN(tempPoint.getX())) {
+				return true;
+			}
+		}
+		return false;
+	}
+		
+		
 	
 	public void createConnections() {
 		for (int i = 0; i < nodes.size(); i++) {
@@ -85,18 +130,22 @@ public class ArtGallery {
 	}
 	
 	public boolean checkPossibleConnection(Node node1, Node node2) {
-		Line2D tempLine = new Line2D.Double(node1.getX(), node1.getY(), node2.getX(), node2.getY());
+		Line2D.Double tempLine = new Line2D.Double(node1.getX(), node1.getY(), node2.getX(), node2.getY());
 		
 		double tempAngle = Math.atan2(node2.getX() - node1.getX(), node2.getY() - node1.getY());
 		if (tempAngle < 0) tempAngle = tempAngle + 2*Math.PI;
 		if (tempAngle == 0) tempAngle = 2*Math.PI;
-		//System.out.println(tempAngle + " " + node1.getAngleOne() + " " + node1.getAngleTwo());
+		tempAngle = Math.toDegrees(tempAngle);
+		System.out.println(tempAngle + " " + node1.getAngleOne() + " " + node1.getAngleTwo());
 		if (tempAngle > node1.getAngleOne() || tempAngle < node1.getAngleTwo()) return false;
 		
 		int intersectCounter = 0;
 		for (int i = 0; i < edges.size(); i++) {
 			if (testIntersection(tempLine, edges.get(i))) {
-				if (!checkIfNodeIntersect(tempLine, edges.get(i), node1, node2)) intersectCounter++;
+				if (!checkIfNodeIntersect(tempLine, edges.get(i), node1, node2)) {
+					System.out.println(getIntersectionPoint(tempLine, edges.get(i)));
+					intersectCounter++;
+				}
 			}
 		}
 		//System.out.println(intersectCounter);
@@ -123,11 +172,11 @@ public class ArtGallery {
 	}
 		
 	
-	public boolean checkIfNodeIntersect(Line2D line1, Line2D line2, Node node1, Node node2) {
+	public boolean checkIfNodeIntersect(Line2D.Double line1, Line2D.Double line2, Node node1, Node node2) {
 		for (int j = 0; j < nodes.size(); j++) {
-			Point2D tempPoint = getIntersectionPoint(line1, line2);
+			Point2D.Double tempPoint = getIntersectionPoint(line1, line2);
 			//System.out.println(tempPoint);
-			if (tempPoint.getX() == nodes.get(j).getX() && tempPoint.getY() == nodes.get(j).getY() || Double.isNaN(tempPoint.getX())) {
+			if (precisionCheck(tempPoint, nodes.get(j)) || Double.isNaN(tempPoint.getX())) {
 				if (nodes.get(j) == node1) return true;
 				if (nodes.get(j) == node2) return true;
 				if (checkAngle(nodes.get(j), node2)) {
@@ -135,6 +184,15 @@ public class ArtGallery {
 				}
 			}
 		}
+		return false;
+	}
+	
+	public boolean precisionCheck(Point2D.Double point, Node node) {
+		double precision = 0.0000000001; 
+		if (point.getX() <= node.getX()+precision && point.getX() >= node.getX()-precision 
+				&& point.getY() <= node.getY()+precision && point.getY() >= node.getY()-precision)
+			return true;
+		
 		return false;
 	}
 		
@@ -186,7 +244,7 @@ public class ArtGallery {
 					
 				
 	
-	public Point2D getIntersectionPoint(Line2D line1, Line2D line2) {
+	/*public Point2D.Double getIntersectionPoint(Line2D line1, Line2D line2) {
 
         final double x1,y1, x2,y2, x3,y3, x4,y4;
         x1 = line1.getX1(); y1 = line1.getY1(); x2 = line1.getX2(); y2 = line1.getY2();
@@ -197,8 +255,22 @@ public class ArtGallery {
                 ((x1 - x2)*(y3 - y4) - (y1 - y2)*(x3 - x4));
 
         return new Point2D.Double(x, y);
+    }*/
+	
+	 public Point2D.Double getIntersectionPoint(Line2D.Double line1, Line2D.Double line2) {
+		      double px = line1.getX1(),
+		            py = line1.getY1(),
+		            rx = line1.getX2()-px,
+		            ry = line1.getY2()-py;
+		      double qx = line2.getX1(),
+		            qy = line2.getY1(),
+		            sx = line2.getX2()-qx,
+		            sy = line2.getY2()-qy;
 
-    }
+		      double det = sx*ry - sy*rx;
+		       double z = (sx*(qy-py)+sy*(px-qx))/det;
+		        return new Point2D.Double((double)(px+z*rx), (double)(py+z*ry));
+		 }
 	
 	public static void main(String args[]) {
 		new ArtGallery();
