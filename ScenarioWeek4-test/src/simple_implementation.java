@@ -432,18 +432,19 @@ class Polygon{
 		}
 		// segment is unseparatable
 		// so,if the mid point is inside polygon, whole segment will inside
+		int accuracy = 100;
 		double startX = s.p1.x;
 		double startY = s.p1.y;
-		double splitPartX = (s.p1.x-s.p2.x)/10;
-		double splitPartY = (s.p1.y-s.p2.y)/10;
-		startX -= splitPartX;
-		startY -= splitPartY;
+		double splitPartX = (s.p1.x-s.p2.x)/accuracy;
+		double splitPartY = (s.p1.y-s.p2.y)/accuracy;
+		startX -= splitPartX*2;
+		startY -= splitPartY*2;
 		Point checkPoint = new Point(startX, startY);
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < accuracy-2; i++) {
 			if (!this.Inside(checkPoint)) return false;
+			checkPoint = new Point(startX, startY);
 			startX -= splitPartX;
 			startY -= splitPartY;
-			checkPoint = new Point(startX, startY);
 		}
 		
 		return true;

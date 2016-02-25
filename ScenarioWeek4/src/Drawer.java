@@ -33,17 +33,11 @@ public class Drawer extends JPanel {
 	private int biggestY;
 	private int smallestY;
 	
-	private double transformX;
-	private double transformY;
-	
 	private ArrayList<Guard> guardList = new ArrayList<Guard>();
 	private ArrayList<Line2D> lineList = new ArrayList<Line2D>();
 	private ArrayList<IntersectPoint> intersectList = new ArrayList<IntersectPoint>();
 	
 	private int galleryNumber;
-	
-	Line2D testLine = new Line2D.Double(100,100,200,200);
-	
 	private double[][] galleryPoints;
 	
 	public Drawer() {
@@ -168,11 +162,11 @@ public class Drawer extends JPanel {
 	}
 	
 	public double getGuardX(int id){
-		return (guardList.get(id).getX()/(scale+smallestX));
+		return ((guardList.get(id).getX()/scale)+smallestX);
 	}
 	
 	public double getGuardY(int id){
-		return (guardList.get(id).getY()/(scale+smallestY));
+		return ((guardList.get(id).getY()/scale)+smallestY);
 	}
 	
 	public int getGuardListSize(){
@@ -271,14 +265,6 @@ public class Drawer extends JPanel {
 		return guardList;
 	}
 	
-	public double getTransformX() {
-		return transformX;
-	}
-	
-	public double getTransformY() {
-		return transformY;
-	}
-	
 	public double getScale() {
 		return scale;
 	}
@@ -341,8 +327,6 @@ public class Drawer extends JPanel {
 		
 		
 		add(initialTextArea);
-	    transformX = (-smallestX*scale)+45;
-	    transformY = (getHeight()+(smallestY*scale)-30);
 	}
 	  
     public static void main(String[] args) {
