@@ -35,6 +35,8 @@ public class Menubar {
 		file.add(open2);
 		JMenuItem export1 = new JMenuItem("Export for part 1");
 		file.add(export1);
+		JMenuItem export2 = new JMenuItem("Export for part 2");
+		file.add(export2);
 		
 		export1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -42,7 +44,7 @@ public class Menubar {
 					int galleryNumber = drawer.getGalleryNumber();
 					int guardListSize = drawer.getGuardListSize();
 					if(guardListSize>0){
-						File file = new File("Question" + galleryNumber + "answer.txt");
+						File file = new File("Part1Question" + galleryNumber + "answer.txt");
 					    try {
 							file.createNewFile();
 						    FileWriter writer = new FileWriter(file); 
@@ -60,9 +62,9 @@ public class Menubar {
 						    }
 						    writer.flush();
 						    writer.close();
-						    JOptionPane.showMessageDialog(f,  "Export successful as 'Question" + galleryNumber + "answer.txt'.");
+						    JOptionPane.showMessageDialog(f,  "Export successful as 'Part1Question" + galleryNumber + "answer.txt'.");
 					    } catch (IOException e) {
-						e.printStackTrace();
+					    	e.printStackTrace();
 					    }
 					}
 					else{
@@ -76,6 +78,32 @@ public class Menubar {
 						    JOptionPane.ERROR_MESSAGE);
 				}
 			}		
+		});
+		
+		export2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(part==2){
+					int galleryNumber = drawer.getGalleryNumber();
+					File file = new File("Part2Question" + galleryNumber + "answer.txt");
+					try {
+						file.createNewFile();
+						FileWriter writer = new FileWriter(file);
+						writer.write("sloth\nrl5qgj5n4mc68qsekeig4j4jfs\n"); 
+					    writer.write(galleryNumber+": ");
+					    writer.flush();
+					    writer.close();
+					    JOptionPane.showMessageDialog(f,  "Export successful as 'Part2Question" + galleryNumber + "answer.txt'.");
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+				else{
+					JOptionPane.showMessageDialog(f,
+						    "You have not opened a part 2 question.",
+						    "Error",
+						    JOptionPane.ERROR_MESSAGE);
+				}
+			}
 		});
 		
 		open1.addActionListener(new ActionListener() {
