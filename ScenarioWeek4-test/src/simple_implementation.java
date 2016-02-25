@@ -434,12 +434,12 @@ class Polygon{
 		// so,if the mid point is inside polygon, whole segment will inside
 		double startX = s.p1.x;
 		double startY = s.p1.y;
-		double splitPartX = (s.p1.x-s.p2.x)/100;
-		double splitPartY = (s.p1.y-s.p2.y)/100;
+		double splitPartX = (s.p1.x-s.p2.x)/10;
+		double splitPartY = (s.p1.y-s.p2.y)/10;
 		startX -= splitPartX;
 		startY -= splitPartY;
 		Point checkPoint = new Point(startX, startY);
-		for (int i = 0; i < 99; i++) {
+		for (int i = 0; i < 9; i++) {
 			if (!this.Inside(checkPoint)) return false;
 			startX -= splitPartX;
 			startY -= splitPartY;

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 
 public class ArtGallery {
-	//double galleryPoints[][] = {{5, 2}, {4.5, 1}, {4, 1}, {3.5, 2}, {3, 1}, {2.5, 1}, {2, 2}, {1.5, 1}, {1, 1}, {0.5, 2}, {0, 0}, {5, 0}};
-	//double galleryPoints[][] = {{10, 5}, {9, 5}, {9, 7}, {8, 7}, {8, 5}, {6, 5}, {6, 7}, {5, 7}, {5, 3}, {4, 3}, {4, 5}, {3, 5}, {3, 3}, {2, 3}, {2, 7}, {1, 7}, {1, 6}, {0, 6}, {0, 10}, {-1, 10}, {-1, 9}, {-3, 9}, {-3, 8}, {-1, 8}, {-1, 6}, {-4, 6}, {-4, 5}, {-3, 5}, {-3, 4}, {-7, 4}, {-7, 3}, {-6, 3}, {-6, 2}, {-11, 2}, {-11, 1}, {-10, 1}, {-10, -1}, {-9, -1}, {-9, 1}, {-8, 1}, {-8, -1}, {-7, -1}, {-7, 1}, {-6, 1}, {-6, -2}, {-5, -2}, {-5, 3}, {-3, 3}, {-3, 0}, {-2, 0}, {-2, 5}, {-1, 5}, {-1, 3}, {0, 3}, {0, 5}, {1, 5}, {1, 1}, {0, 1}, {0, 0}, {1, 0}, {1, -1}, {-2, -1}, {-2, -2}, {-1, -2}, {-1, -3}, {-3, -3}, {-3, -4}, {-1, -4}, {-1, -5}, {0, -5}, {0, -2}, {1, -2}, {1, -3}, {2, -3}, {2, -2}, {3, -2}, {3, -4}, {4, -4}, {4, -2}, {5, -2}, {5, -1}, {2, -1}, {2, 0}, {3, 0}, {3, 1}, {2, 1}, {2, 2}, {7, 2}, {7, 3}, {6, 3}, {6, 4}, {10, 4}};
 	ArrayList<Line2D.Double> edges = new ArrayList<Line2D.Double>();
 	ArrayList<Node> nodes = new ArrayList<Node>();
 	ArrayList<Point2D> guardPoints = new ArrayList<Point2D>();
@@ -17,32 +15,18 @@ public class ArtGallery {
 	
 	public ArtGallery() {
 		reader.readData();
-		galleryPoints = reader.getData(30);
+		galleryPoints = reader.getData(5);
 		
 		for (int i = 0; i < galleryPoints.length; i++) {
 			gallery.addVertex(galleryPoints[i][0], galleryPoints[i][1]);
 		}
 		
 		createNodesAndEdges();
-		calculateNodeAngleRanges();
+		//calculateNodeAngleRanges();
 		createConnections();
 		placeGuards();
 		
-		//Segment testLine = new Segment(new Point(nodes.get(24).getX(), nodes.get(24).getY()), new Point(nodes.get(26).getX(), nodes.get(26).getY()));
-		
-		//if (gallery.Cover(testLine)) System.out.println("covers");
-		///if (checkPossibleConnection(nodes.get(24), nodes.get(25))) System.out.println("HI");
-		//System.out.println(nodes.get(24).getX() + " " + nodes.get(24).getY());
-		//for (Node node : nodes.get(0).getConnectedNodes()) {
-		//	System.out.println(node.getX() + " " + node.getY());
-		//}
-		
-		//System.out.println(nodes.get(0).getConnectedNodes().size());
-		//System.out.println(nodes.get(35).getConnectedNodes().size());
-		
-		//System.out.println((Math.toDegrees(Math.atan2(6-3.47, -3.43+6.08))+360)%360);
-		
-		//angleRangeCheckTest(nodes.get(24), nodes.get(24).getAngleOne(), nodes.get(24).getAngleTwo());
+		//runTests();
 		
 		for (Point2D point : guardPoints) {
 			System.out.println(point);
@@ -68,7 +52,25 @@ public class ArtGallery {
 		}
 	}
 	
-	public void calculateNodeAngleRanges() {
+	public void runTests() {
+		//Segment testLine = new Segment(new Point(nodes.get(24).getX(), nodes.get(24).getY()), new Point(nodes.get(26).getX(), nodes.get(26).getY()));
+		
+		//if (gallery.Cover(testLine)) System.out.println("covers");
+		//if (checkPossibleConnection(nodes.get(24), nodes.get(25))) System.out.println("HI");
+		//System.out.println(nodes.get(1).getX() + " " + nodes.get(1).getY());
+		for (Node node : nodes.get(1).getConnectedNodes()) {
+			System.out.println(node.getX() + " " + node.getY());
+		}
+		
+		//System.out.println(nodes.get(1).getConnectedNodes().size());
+		//System.out.println(nodes.get(35).getConnectedNodes().size());
+		
+		//System.out.println((Math.toDegrees(Math.atan2(6-3.47, -3.43+6.08))+360)%360);
+		
+		//angleRangeCheckTest(nodes.get(24), nodes.get(24).getAngleOne(), nodes.get(24).getAngleTwo());
+	}
+	
+	/*public void calculateNodeAngleRanges() {
 		for (Node node: nodes) {
 			double angle1 = Math.atan2(node.getConnectedNodes().get(0).getY() - node.getY(), node.getConnectedNodes().get(0).getX() - node.getX());
 			//if (angle1 < 0) angle1 = angle1 + 2*Math.PI;
@@ -135,34 +137,6 @@ public class ArtGallery {
 		else return false;
 	}
 	
-	boolean convex(double x1, double y1, double x2, double y2, 
-		       double x3, double y3)
-		{
-		if (area(x1, y1, x2, y2, x3, y3) < 0)
-		    return true;
-		else
-		    return false;
-		}
-
-
-		/* area:  determines area of triangle formed by three points
-		 */
-		double area(double x1, double y1, double x2, double y2,
-		    double x3, double y3)
-		{
-		double areaSum = 0;
-
-		areaSum += x1 * (y3 - y2);
-		areaSum += x2 * (y1 - y3);
-		areaSum += x3 * (y2 - y1);
-
-		/* for actual area, we need to multiple areaSum * 0.5, but we are
-		     * only interested in the sign of the area (+/-)
-		     */
-
-		return areaSum;
-		}
-	
 	public boolean nodeIntersect(Line2D.Double line1, Line2D.Double line2) {
 		for (int j = 0; j < nodes.size(); j++) {
 			Point2D.Double tempPoint = getIntersectionPoint(line1, line2);
@@ -172,7 +146,7 @@ public class ArtGallery {
 			}
 		}
 		return false;
-	}
+	}*/
 		
 		
 	
@@ -190,7 +164,10 @@ public class ArtGallery {
 	}
 	
 	public boolean checkPossibleConnection(Node node1, Node node2) {
-		Line2D.Double tempLine = new Line2D.Double(node1.getX(), node1.getY(), node2.getX(), node2.getY());
+		Segment tempPoint = new Segment(new Point(node1.getX(), node1.getY()), new Point(node2.getX(), node2.getY()));
+		if (!gallery.Cover(tempPoint)) return false;
+		
+		//Line2D.Double tempLine = new Line2D.Double(node1.getX(), node1.getY(), node2.getX(), node2.getY());
 		
 		/*double tempAngle = Math.atan2(node2.getY() - node1.getY(), node2.getX() - node1.getX());
 		if (tempAngle < 0) tempAngle = tempAngle + 2*Math.PI;
@@ -198,10 +175,7 @@ public class ArtGallery {
 		tempAngle = (Math.toDegrees(tempAngle)+360)%360;
 		System.out.println(tempAngle + " " + node1.getAngleOne() + " " + node1.getAngleTwo());
 		if (tempAngle > node1.getAngleOne() || tempAngle < node1.getAngleTwo()) return false;*/
-		
-		Segment tempPoint = new Segment(new Point(node1.getX(), node1.getY()), new Point(node2.getX(), node2.getY()));
-		if (!gallery.Cover(tempPoint)) return false;
-		
+
 		/*int intersectCounter = 0;
 		for (int i = 0; i < edges.size(); i++) {
 			if (testIntersection(tempLine, edges.get(i))) {
@@ -217,7 +191,7 @@ public class ArtGallery {
 		return true;
 	}
 	
-	public boolean checkIfParallel(Line2D line, Double angle) {
+	/*public boolean checkIfParallel(Line2D line, Double angle) {
 		double angle1 = Math.atan2(line.getX1() - line.getX2(), line.getY1() - line.getY2());
 		if (angle1 < 0) angle1 = angle1 + 2*Math.PI;
 		double angle2 = Math.atan2(line.getX2() - line.getX1(), line.getY2() - line.getY1());
@@ -262,7 +236,7 @@ public class ArtGallery {
 		
 	public boolean testIntersection(Line2D line1, Line2D line2) {
 		return line1.intersectsLine(line2);
-	}
+	}*/
 	
 	public void placeGuards() {
 		/*for (Node node : nodes) {
@@ -321,7 +295,7 @@ public class ArtGallery {
         return new Point2D.Double(x, y);
     }*/
 	
-	 public Point2D.Double getIntersectionPoint(Line2D.Double line1, Line2D.Double line2) {
+	 /*public Point2D.Double getIntersectionPoint(Line2D.Double line1, Line2D.Double line2) {
 		      double px = line1.getX1(),
 		            py = line1.getY1(),
 		            rx = line1.getX2()-px,
@@ -334,7 +308,7 @@ public class ArtGallery {
 		      double det = sx*ry - sy*rx;
 		       double z = (sx*(qy-py)+sy*(px-qx))/det;
 		        return new Point2D.Double((double)(px+z*rx), (double)(py+z*ry));
-		 }
+	}*/
 	
 	public static void main(String args[]) {
 		new ArtGallery();
