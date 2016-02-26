@@ -117,7 +117,7 @@ public class Drawer extends JPanel {
 				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle+precision);
 			}
 			
-			for (int i = 0; i < nodes.size(); i++) {
+			/*for (int i = 0; i < nodes.size(); i++) {
 				if (guard.getX() == nodes.get(i).getX() && guard.getY() == nodes.get(i).getY()) {
 					double biggestAngle = 0;
 					double smallestAngle = 0;
@@ -132,8 +132,16 @@ public class Drawer extends JPanel {
 					intersectList.add(new IntersectPoint(guard.getX(), guard.getY(), (biggestAngle-smallestAngle)/2));
 					break;
 				}
-			}
+			}*/
 			guard.setIntersectList(intersectList);
+			/*Collections.sort(guard.getIntersectList(), new AngleComparator());
+			for (int i = 0; i < nodes.size(); i++) {
+				if (guard.getX() == nodes.get(i).getX() && guard.getY() == nodes.get(i).getY()) {
+					intersectList.add(new IntersectPoint(guard.getX(), guard.getY(), (guard.getIntersectList().get(0).getAngle()+0.001)));
+					break;
+				}
+			}*/
+			Collections.sort(guard.getIntersectList(), new AngleComparator());
 			createLineOfSight(guard);
 		//}
 	}
@@ -196,8 +204,18 @@ public class Drawer extends JPanel {
 				if (angle < 0) angle += 2*Math.PI;
 				intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
 				guard.addToLineList(tempLine);
+				return;
 			} 
 		} catch (Exception e) {}
+		
+		for (int i = 0; i < intersectList.size(); i++) {
+			if (intersectList.get(i).getX() == guard.getX() && intersectList.get(i).getY() == guard.getY()) {
+				return;
+			}
+		}
+		
+		intersectList.add(new IntersectPoint(guard.getX(), guard.getY(), angle));
+		
 	}
 	
 	public boolean isNode(Point2D.Double tempPoint) {
@@ -283,7 +301,6 @@ public class Drawer extends JPanel {
 	
 	public void createLineOfSight(Guard guard) {
 		Path2D.Double tempPath = new Path2D.Double();
-		Collections.sort(guard.getIntersectList(), new AngleComparator());
 		tempPath.moveTo(guard.getIntersectList().get(0).getX(), guard.getIntersectList().get(0).getY());
 		for (int j = 1; j < guard.getIntersectList().size(); j++) {
 			tempPath.lineTo(guard.getIntersectList().get(j).getX(), guard.getIntersectList().get(j).getY());
@@ -483,7 +500,7 @@ public class Drawer extends JPanel {
 	}
 	
 	public double getGuardY(int guard) {
-		return (guardList.get(guard).getY()-translateX)/scale;
+		return (guardList.get(guard).getY()-translateY)/scale;
 	}
 	
 	public void paintComponent(Graphics g) {
