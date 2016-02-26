@@ -113,9 +113,9 @@ public class Reader {
 					y = Double.parseDouble(pair); //Get y coord of guard
 				}
 				if(counter%2 == 0){
-					//System.out.println("Guard added at x:" + x + "y:" + y);
+					System.out.println("Guard added at x:" + x + "y:" + y);
 					//(y*drawer.getScale()+30)+drawer.getFrameHeight()
-					drawer.addGuard((x-drawer.getSmallestX())*drawer.getScale(),(y-drawer.getSmallestY())*drawer.getScale()); //Uncomment this when bug is fixed!
+					drawer.addGuard((x*drawer.getScale()+drawer.getTranslateX()),(y*drawer.getScale()+drawer.getTranslateY())); //Uncomment this when bug is fixed!
 				}
 			}
 		}

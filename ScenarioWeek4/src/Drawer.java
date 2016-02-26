@@ -16,7 +16,7 @@ import javax.swing.text.DefaultHighlighter;
 
 public class Drawer extends JPanel {
 
-	private Path2D path = new Path2D.Double();
+	private Path2D.Double path = new Path2D.Double();
 	private JFrame f;
 	private JTextArea initialTextArea;
 	private DragAndDropListener listener;
@@ -24,21 +24,33 @@ public class Drawer extends JPanel {
 	private Intersection intersection;
 	private Menubar menubar;
 	
-	private int scale = 30;
-	private int translateX;
-	private int translateY;
+	private double scale = 30;
+	private double translateX;
+	private double translateY;
 	
-	private int biggestX;
-	private int smallestX;
-	private int biggestY;
-	private int smallestY;
+	private double biggestX;
+	private double smallestX;
+	private double biggestY;
+	private double smallestY;
+	
+	private double transformX;
+	private double transformY;
 	
 	private ArrayList<Guard> guardList = new ArrayList<Guard>();
-	private ArrayList<Line2D> lineList = new ArrayList<Line2D>();
 	private ArrayList<IntersectPoint> intersectList = new ArrayList<IntersectPoint>();
+	private ArrayList<Line2D.Double> edges = new ArrayList<Line2D.Double>();
+	private ArrayList<Node> nodes = new ArrayList<Node>();
+	private ArrayList<Point2D.Double> guardPoints = new ArrayList<Point2D.Double>();
 	
 	private int galleryNumber;
+	private Polygon galleryPolygon = new Polygon();
+	
+	//Line2D testLine = new Line2D.Double(100,100,200,200);
+	Line2D.Double testLine = new Line2D.Double(100, 100,  100+ Math.cos(0) * 500, 100+ Math.sin(0) * 500);
+	
 	private double[][] galleryPoints;
+	
+	private Algorithm algorithm;
 	
 	public Drawer() {
 		listener = new DragAndDropListener(this);
@@ -72,60 +84,205 @@ public class Drawer extends JPanel {
 	    repaint();
 	}
 	
+	public void createEdges() {
+		Line2D.Double tempLine;
+		for (int i = 0; i < galleryPoints.length; i++) {
+			galleryPolygon.addVertex(galleryPoints[i][0], galleryPoints[i][1]);
+			nodes.add(new Node(galleryPoints[i][0], galleryPoints[i][1]));
+			if (i == galleryPoints.length-1) {
+				tempLine = new Line2D.Double(galleryPoints[i][0], galleryPoints[i][1], galleryPoints[0][0], galleryPoints[0][1]);
+			} else {
+				tempLine = new Line2D.Double(galleryPoints[i][0], galleryPoints[i][1], galleryPoints[i+1][0], galleryPoints[i+1][1]);
+			}
+			edges.add(tempLine);
+		}
+	}
+	
 	public void drawLine(Guard guard) {
-		Line2D tempLine;
+		Line2D.Double tempLine;
 		double angle;
 		
 		//for (int i = 0; i < guardList.size(); i++) {
 			intersectList.clear();
-			lineList.clear();
 			for (int j = 0; j < galleryPoints.length; j++) {
 				angle = Math.atan2(galleryPoints[j][1]-guard.getY(),galleryPoints[j][0]-guard.getX());
-				tempLine = new Line2D.Double(guard.getX(), guard.getY(), guard.getX() + Math.cos(angle-0.0000001) * 500, guard.getY() + Math.sin(angle-0.0000001) * 500);
-				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle-0.0000001);
+				double precision = 0.00001;
+				tempLine = new Line2D.Double(guard.getX(), guard.getY(), guard.getX() + Math.cos(angle-precision) * 2000, guard.getY() + Math.sin(angle-precision) * 2000);
+				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle-precision);
 				
 				tempLine = new Line2D.Double(guard.getX(), guard.getY(), galleryPoints[j][0], galleryPoints[j][1]);
 				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle);
 				
-				tempLine = new Line2D.Double(guard.getX(), guard.getY(), guard.getX() + Math.cos(angle+0.0000001) * 500, guard.getY() + Math.sin(angle+0.0000001) * 500);
-				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle+0.0000001);
+				tempLine = new Line2D.Double(guard.getX(), guard.getY(), guard.getX() + Math.cos(angle+precision) * 2000, guard.getY() + Math.sin(angle+precision) * 2000);
+				testAndCreateIntersection(guard, guard.getX(), guard.getY(), path, tempLine, angle+precision);
 			}
 			
+			for (int i = 0; i < nodes.size(); i++) {
+				if (guard.getX() == nodes.get(i).getX() && guard.getY() == nodes.get(i).getY()) {
+					double biggestAngle = 0;
+					double smallestAngle = 0;
+					for (int k = 0; k < guard.getIntersectList().size(); k++) {
+						if (guard.getIntersectList().get(k).getAngle() > biggestAngle) {
+							biggestAngle = guard.getIntersectList().get(k).getAngle();
+						}
+						if (guard.getIntersectList().get(k).getAngle() < smallestAngle) {
+							biggestAngle = guard.getIntersectList().get(k).getAngle();
+						}
+					}
+					intersectList.add(new IntersectPoint(guard.getX(), guard.getY(), (biggestAngle-smallestAngle)/2));
+					break;
+				}
+			}
 			guard.setIntersectList(intersectList);
 			createLineOfSight(guard);
 		//}
 	}
 	
-	public void testAndCreateIntersection(Guard guard, double x, double y, Path2D path, Line2D tempLine, double angle) {
-		ArrayList<Point2D> tempList = new ArrayList<Point2D>();
+	public void testAndCreateIntersection(Guard guard, double x, double y, Path2D.Double path, Line2D.Double tempLine, double angle) {
+		ArrayList<Point2D.Double> tempList = new ArrayList<Point2D.Double>();
 		tempList.clear();
+		//guard.addToLineList(tempLine);
 		
-		try {
+		for (int i = 0; i < edges.size(); i++) {
+			Point2D.Double tempPoint = null;
+			if (tempLine.intersectsLine(edges.get(i))) {
+				tempPoint = intersection.getIntersection(tempLine, edges.get(i));
+				if (tempPoint != null && !Double.isNaN(tempPoint.getX()) && !Double.isNaN(tempPoint.getY()) && (tempPoint.getX() != guard.getX() || tempPoint.getY() != guard.getY())) {
+					//System.out.println(tempPoint);
+					tempList.add(tempPoint);
+				}
+			}
+		}
+		
+		/*try {
 			tempList = intersection.getIntersections(path, tempLine);
 		} catch (Exception e) {
 			System.out.println("Error getting intersections");
-		}
+		}*/
 		
 		double minimum = 0;
 		double distance = 0;
-		Point2D tempPoint = null;
-		for (Point2D points : tempList) {
-			distance = calculateDistance(tempLine.getX1(), tempLine.getY1(), points.getX(), points.getY());
-			if (minimum == 0 || minimum > distance) {
-				minimum = distance;
-				tempPoint = points;
+		Point2D.Double tempPoint = null;
+		for (Point2D.Double intersectPoint : tempList) {
+			if (intersectPoint != null) {
+				//System.out.println(intersectPoint);
+				distance = calculateDistance(tempLine.getX1(), tempLine.getY1(), intersectPoint.getX(), intersectPoint.getY());
+				if (minimum == 0 || minimum > distance) {
+					minimum = distance;
+					tempPoint = intersectPoint;
+				}
 			}
 		}
 		
 		try {
-			intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
 			tempLine = new Line2D.Double(x, y, tempPoint.getX(), tempPoint.getY());
-			guard.addToLineList(tempLine);
+			Segment tempSeg = new Segment(new Point(tempLine.getX1(), tempLine.getY1()), new Point(tempLine.getX2(), tempLine.getY2()));
+			
+			for (int i = 0; i < edges.size(); i++) {
+				Segment edgeSeg = new Segment(new Point(edges.get(i).getX1(), edges.get(i).getY1()), new Point(edges.get(i).getX2(), edges.get(i).getY2()));
+				if (tempSeg.sameDirection(edgeSeg)) {
+					if ((tempLine.getX1() == edges.get(i).getX1() && tempLine.getY1() == edges.get(i).getY1() && 
+							tempLine.getX2() == edges.get(i).getX2() && tempLine.getY2() == edges.get(i).getY2()) ||
+							(tempLine.getX1() == edges.get(i).getX2() && tempLine.getY1() == edges.get(i).getY2() && 
+							tempLine.getX2() == edges.get(i).getX1() && tempLine.getY2() == edges.get(i).getY1())) {
+						if (angle < 0) angle += 2*Math.PI;
+						intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
+						guard.addToLineList(tempLine);
+						return;
+					}
+				}	
+			}
+			if (insidePolygon(tempSeg)) {
+				if (angle < 0) angle += 2*Math.PI;
+				intersectList.add(new IntersectPoint(tempPoint.getX(), tempPoint.getY(), angle));
+				guard.addToLineList(tempLine);
+			} 
 		} catch (Exception e) {}
 	}
 	
+	public boolean isNode(Point2D.Double tempPoint) {
+		for (int k = 0; k < nodes.size(); k++) {
+			if (tempPoint.getX() == nodes.get(k).getX() && tempPoint.getY() == nodes.get(k).getY()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean insidePolygon(Segment s) {
+		Point2D.Double tempPoint = null;
+		double intersectCounter = 0;
+		Line2D.Double tempLine;
+		
+		double precision = 1;
+		int accuracy = 10;
+		double startX = s.p1.x;
+		double startY = s.p1.y;
+		double splitPartX = (s.p1.x-s.p2.x)/accuracy;
+		double splitPartY = (s.p1.y-s.p2.y)/accuracy;
+		startX -= splitPartX;
+		startY -= splitPartY;
+		for (int i = 0; i < accuracy-1; i++) {
+			tempPoint = null;
+			intersectCounter = 0;
+			tempLine = new Line2D.Double(startX, startY, startX + Math.cos(0) * 2000, startY+ Math.sin(0) * 2000);
+			for (int j = 0; j < edges.size(); j++) {
+				if (tempLine.intersectsLine(edges.get(j))) {
+					tempPoint = intersection.getIntersection(tempLine, edges.get(j));
+					if (!Double.isNaN(tempPoint.getX())) {
+						intersectCounter++;
+						//System.out.println(tempPoint.getX() + " " + tempPoint.getY() + " : " + intersectCounter);
+					}
+				}
+				if (tempPoint != null && !Double.isNaN(tempPoint.getX())) {
+					if (isNode(tempPoint)) {
+						intersectCounter = 1;
+						break;
+					}
+					tempPoint = null;
+				}
+			}
+		
+			if (intersectCounter%2 == 0) {
+				//System.out.println(startX + " " + startY + " : " + intersectCounter);
+				return false;
+			}
+			
+			tempPoint = null;
+			intersectCounter = 0;
+			tempLine = new Line2D.Double(startX, startY, startX + Math.cos(90) * 2000, startY+ Math.sin(90) * 2000);
+			for (int j = 0; j < edges.size(); j++) {
+				if (tempLine.intersectsLine(edges.get(j))) {
+					tempPoint = intersection.getIntersection(tempLine, edges.get(j));
+					if (!Double.isNaN(tempPoint.getX())) {
+						intersectCounter++;
+						//System.out.println(tempPoint.getX() + " " + tempPoint.getY() + " : " + intersectCounter);
+					}
+				}
+				if (tempPoint != null && !Double.isNaN(tempPoint.getX())) {
+					if (isNode(tempPoint)) {
+						intersectCounter = 1;
+						break;
+					}
+					tempPoint = null;
+				}
+			}
+		
+			if (intersectCounter%2 == 0) {
+				//System.out.println(startX + " " + startY + " : " + intersectCounter);
+				return false;
+			}
+			
+			startX -= splitPartX;
+			startY -= splitPartY;
+		}
+		
+		return true;
+	}
+		
+	
 	public void createLineOfSight(Guard guard) {
-		Path2D tempPath = new Path2D.Double();
+		Path2D.Double tempPath = new Path2D.Double();
 		Collections.sort(guard.getIntersectList(), new AngleComparator());
 		tempPath.moveTo(guard.getIntersectList().get(0).getX(), guard.getIntersectList().get(0).getY());
 		for (int j = 1; j < guard.getIntersectList().size(); j++) {
@@ -144,14 +301,27 @@ public class Drawer extends JPanel {
 	
 	public void drawGallery(int questionNumber, int part) {
 		scale = 60;
+		galleryPolygon = new Polygon();
+		edges.clear();
+		guardList.clear();
+		
 		galleryNumber = questionNumber;
 		galleryPoints = reader.getData(questionNumber, part);
-		f.setTitle("Shots on Jaz - Part: " + part + " Question: " + questionNumber);
+		f.setTitle("Art Gallery Problem - Part: " + part + " Question: " + questionNumber);
 		setPolygon(galleryPoints);
 		
-		guardList.clear();
+		createEdges();	  
+
 		removeAll();
 	    repaint();
+	    if (part == 1) {
+	    	algorithm = new Algorithm(galleryPoints);
+	    	guardPoints = algorithm.getGuardPoints();
+	    	
+	    	for (int i = 0; i < guardPoints.size(); i++) {
+	    		addGuard(guardPoints.get(i).getX(), guardPoints.get(i).getY());
+	    	}
+	    }
 		if (part == 2) reader.getGuard(questionNumber);
 		
 	    
@@ -159,18 +329,6 @@ public class Drawer extends JPanel {
 	
 	public int getGalleryNumber(){
 		return galleryNumber;
-	}
-	
-	public double getGuardX(int id){
-		return ((guardList.get(id).getX()/scale)+smallestX);
-	}
-	
-	public double getGuardY(int id){
-		return ((guardList.get(id).getY()/scale)+smallestY);
-	}
-	
-	public int getGuardListSize(){
-		return guardList.size();
 	}
 
 	
@@ -195,36 +353,63 @@ public class Drawer extends JPanel {
 	    
 	    translateX = (biggestX - smallestX)*scale;
 	    translateY = (biggestY - smallestY)*scale;
-	    smallestX = smallestX-1;
-	    smallestY = smallestY-1;
+	    //smallestX = smallestX-1;
+	    //smallestY = smallestY-1;
 	    	    
 	    //f.setSize(-200, 300);
 	    
-	    if (translateX > 1100 || translateY > 650) {
+	    if (translateX > 1100 || translateY > 550) {
 	    	scale--;
 	    	setPolygon(galleryPoints);
 	    	return;
 	    }
 	    
-	    path.moveTo((galleryPoints[0][0]-smallestX)*scale, (galleryPoints[0][1]-smallestY)*scale);
-	    galleryPoints[0][0] = (galleryPoints[0][0]-smallestX)*scale;
-		galleryPoints[0][1] = (galleryPoints[0][1]-smallestY)*scale;
-	    for(int i = 1; i < galleryPoints.length; i++) {
-	    	//for(int j = 0; j < galleryPoints[i].length; j++) {
-	    	path.lineTo((galleryPoints[i][0]-smallestX)*scale, (galleryPoints[i][1]-smallestY)*scale);
-	    		galleryPoints[i][0] = (galleryPoints[i][0]-smallestX)*scale;
-	    		galleryPoints[i][1] = (galleryPoints[i][1]-smallestY)*scale;
-	    	//}
+	    translateX = 0;
+	    translateY = 0;
+	    
+	    for(int i = 0; i < galleryPoints.length; i++) {
+	    	galleryPoints[i][0] = (galleryPoints[i][0])*scale;
+			galleryPoints[i][1] = (galleryPoints[i][1])*scale;
+	    
+	    }
+	    
+	    for(int i = 0; i < galleryPoints.length; i++) {
+	    	while(galleryPoints[i][0] < 0) {
+	    		for(int j = 0; j < galleryPoints.length; j++) {
+	    			galleryPoints[j][0]++;
+	    		}
+	    		translateX++;
+	    	}
+	    	while(galleryPoints[i][1] < 0) {
+	    		for(int j = 0; j < galleryPoints.length; j++) {
+	    			galleryPoints[j][1]++;
+	    		}
+    			translateY++;
+	    	}
+	    }
+	    
+	    translateX += 50;
+	    translateY += 50;
+	    
+	    for(int i = 0; i < galleryPoints.length; i++) {
+	    	galleryPoints[i][0] += 50;
+			galleryPoints[i][1] += 50;
+	    	if (i == 0) path.moveTo((galleryPoints[i][0]), (galleryPoints[i][1]));
+	    	else path.lineTo((galleryPoints[i][0]), (galleryPoints[i][1]));
+	    	if (galleryPoints[i][0] > biggestX) biggestX =  galleryPoints[i][0];
+		    if (galleryPoints[i][0] < smallestX) smallestX = galleryPoints[i][0];
+		    if (galleryPoints[i][1] > biggestY) biggestY =  galleryPoints[i][1];
+		    if (galleryPoints[i][1] < smallestY) smallestY =  galleryPoints[i][1];
 	    }
 	    
 	    path.closePath();
 	    
-	    
+	    f.setSize((int)biggestX+100, (int)biggestY+100);  
 	}
 	  
 	public void addCoordinates(int x, int y, double xCo, double yCo) {
-		xCo = xCo/scale+smallestX;
-		yCo = yCo/scale+smallestY;
+		xCo = (xCo-translateX)/scale;
+		yCo = (yCo-translateY)/scale;
 	  
 		initialTextArea = new JTextArea(0, 20);
 		initialTextArea.setEditable(false);
@@ -265,6 +450,14 @@ public class Drawer extends JPanel {
 		return guardList;
 	}
 	
+	public double getTransformX() {
+		return transformX;
+	}
+	
+	public double getTransformY() {
+		return transformY;
+	}
+	
 	public double getScale() {
 		return scale;
 	}
@@ -273,12 +466,24 @@ public class Drawer extends JPanel {
 		return getHeight();
 	}
 	
-	public double getSmallestX() {
-		return smallestX;
+	public double getTranslateX() {
+		return translateX;
 	}
 	
-	public double getSmallestY() {
-		return smallestY;
+	public double getTranslateY() {
+		return translateY;
+	}
+	
+	public int getGuardListSize() {
+		return guardList.size();
+	}
+	
+	public double getGuardX(int guard) {
+		return (guardList.get(guard).getX()-translateX)/scale;
+	}
+	
+	public double getGuardY(int guard) {
+		return (guardList.get(guard).getY()-translateX)/scale;
 	}
 	
 	public void paintComponent(Graphics g) {
@@ -307,20 +512,22 @@ public class Drawer extends JPanel {
 			}
 		}
 		
-		g2d.setColor(Color.YELLOW);
+		/*g2d.setColor(Color.YELLOW);
 		for (Guard guard : guardList) {
 			if (guard.getLineList() != null) {
-			ArrayList<Line2D> tempList = guard.getLineList();
-			for (Line2D line : tempList) {
-				g2d.draw(line);
+				ArrayList<Line2D> tempList = guard.getLineList();
+				for (Line2D line : tempList) {
+					g2d.draw(line);
+				}
 			}
-			}
-		}
+		}*/
 		
 		g2d.setColor(Color.BLUE);
 		for (Guard guard : guardList) {
-			g2d.fillOval((int)(guard.getX()-scale/10), (int)(guard.getY()-scale/10), scale/5, scale/5);
+			g2d.fillOval((int)(guard.getX()-(int)scale/4), (int)(guard.getY()-(int)scale/4), (int)scale/2, (int)scale/2);
 		}
+		
+		//g2d.draw(testLine);
 		
 		g2d.setTransform(old);
 		g2d.dispose();
